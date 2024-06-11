@@ -16,9 +16,9 @@ def calculate_dx(start_speed, stop_speed, dt):
 def convert_domain_d2t(velocity_profile, route_df, dt):
 
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
-    distance = dx.cumsum() / 1000 # km
+    cum_distance = dx.cumsum() / 1000 # km
 
-    nearest_cum_dist = pd.merge_asof(pd.DataFrame({'distance': distance}), route_df['CumulativeDistance(km)'], left_on = 'distance',  right_on = 'CumulativeDistance(km)', direction = 'nearest')
+    nearest_cum_dist = pd.merge_asof(pd.DataFrame({'distance': cum_distance}), route_df['CumulativeDistance(km)'], left_on = 'distance',  right_on = 'CumulativeDistance(km)', direction = 'nearest')
     result = pd.merge(nearest_cum_dist, route_df, on = 'CumulativeDistance(km)')
     return np.array(result['Slope']), np.array(result['Lattitude']), np.array(result['Longitude'])
     
@@ -64,7 +64,6 @@ def calculate_power_req(speed, acceleration, slope):
 
     # Net power required
     P_net = P_resistance + P_windage + P_ohmic + P_eddy + P_acc
-
     return P_net.clip(0), P_resistance # Returning P_resistance for other calculations
 
 

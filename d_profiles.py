@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from d_config import BATTERY_CAPACITY
 import d_setting
-from d_car_dynamics import calculate_power_req, convert_domain_d2t
+from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 
 def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array):
@@ -26,20 +26,21 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
     battery_profile = np.concatenate((np.array([d_setting.InitialBatteryCapacity]), battery_profile))
 
     battery_profile = battery_profile * 100 / (BATTERY_CAPACITY)
+    dx = calculate_dx(start_speeds, stop_speeds, dt)
 
     # Matching shapes
-    dt =  np.concatenate((np.array([0]), dt.cumsum())) + d_setting.TimeOffset
+    dt =  np.concatenate((np.array([0]), dt))
     energy_gain = np.concatenate((np.array([np.nan]), energy_gain))
     energy_consumption =  np.concatenate((np.array([np.nan]), energy_consumption,))
     acceleration = np.concatenate((np.array([np.nan]), acceleration,))
-    distances = velocity_profile * dt
-
+    dx = np.concatenate((np.array([0]), dx))
+    
     return [
-        distances,
+        dt.cumsum(),
         velocity_profile,
         acceleration,
         battery_profile,
         energy_consumption,
         energy_gain,
-        dt,
+        dx,
     ]
