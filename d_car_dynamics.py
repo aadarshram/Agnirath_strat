@@ -64,6 +64,7 @@ def calculate_power_req(speed, acceleration, slope):
 
     # Net power required
     P_net = P_resistance + P_windage + P_ohmic + P_eddy + P_acc
+    # print("\u001b[31m",   CAR_MASS * GRAVITY * np.sin(np.radians(slope)) * speed, "\u001b[34m", acceleration, "\u001b[32m", slope, "\u001b[33m", speed, "\u001b[35m", P_acc, "\u001b[0m")
     return P_net.clip(0), P_resistance # Returning P_resistance for other calculations
 
 

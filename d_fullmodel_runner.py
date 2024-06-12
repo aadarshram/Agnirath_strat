@@ -38,23 +38,26 @@ stop_gain = 0
 
     #     # day_counter += 1
     #     pass
-present_battery_cent = 100
+present_battery_cent = None
 
 for i in range(5):
     #d_setting.set_day_state(day_counter, i, time_counter)
     if i == 0:
-        pass
+        present_battery_cent = 100
+        cum_d = 0
     else:
         present_battery_cent = np.array(outdf['Battery'])[-1]
+        cum_d = np.array(outdf['Cumulative Distance'])[-1]
 
-    d_setting.set_day(day_counter, present_battery_cent, time_counter)
+    d_setting.set_day(day_counter, present_battery_cent, i, time_counter)
 
-    outdf, timetaken = main(d_setting.route_df)
+    outdf, timetaken = main(d_setting.route_df, cum_d)
     outdf['Time'] = outdf['Time'] + T * i
+    outdf['Cumulative Distance'] += cum_d 
     df_list.append(outdf)
-    dfnet = pd.concat(df_list)
     time_counter += timetaken
     day_counter += 1
 
+dfnet = pd.concat(df_list)
 dfnet.to_csv('run_dat.csv', index=False)
 print("Written 5days data to `run_dat.csv`")

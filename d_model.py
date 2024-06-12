@@ -11,10 +11,10 @@ from d_profiles import extract_profiles
 
 
 
-def main(route_df):
+def main(route_df, cum_d):
     # choose dt in whatevr resolution
     DT = d_setting.RaceEndTime - d_setting.RaceStartTime
-    step = 600 # s
+    step = 200 # s
     N = DT // step
     dt = np.full(N, step)
 
@@ -29,22 +29,22 @@ def main(route_df):
 
     bounds = get_bounds(N_V)
 
-    # constraints = [
-    #     {
-    #         "type": "ineq",
-    #         "fun": battery_and_acc_constraint,
-    #         "args": (
-    #             dt, cum_d_array, slope_array, lattitude_array, longitude_array
-    #         )
-    #     },
-    #     # {
-    #     #     "type": "ineq",
-    #     #     "fun": final_battery_constraint,
-    #     #     "args": (
-    #     #         dt, cum_d_array, slope_array, lattitude_array, longitude_array
-    #     #     )
-    #     # },
-    # ]
+    constraints = [
+        {
+            "type": "ineq",
+            "fun": battery_and_acc_constraint,
+            "args": (
+                dt, cum_d_array, slope_array, lattitude_array, longitude_array
+            )
+        },
+        # {
+        #     "type": "ineq",
+        #     "fun": final_battery_constraint,
+        #     "args": (
+        #         dt, cum_d_array, slope_array, lattitude_array, longitude_array
+        #     )
+        # },
+     ]
 
 
     print("Starting Optimisation")
@@ -53,12 +53,13 @@ def main(route_df):
     optimised_velocity_profile = minimize(
         objective, 
         initial_velocity_profile,
-        args = (dt, cum_d_array, slope_array, lattitude_array, longitude_array
+        args = (dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d
                 ),
         bounds = bounds,
         method = d_setting.ModelMethod,
-        #constraints = constraints,
-        #options = {'catol': 0}
+        constraints = constraints,
+        # options = {'catol': 10 ** -6, 'disp': True, 'maxiter': 10 ** 5}
+        #options = {'verbose': 3}
     )
     optimised_velocity_profile = np.array(optimised_velocity_profile.x) * 1 # derive the velocity profile
 

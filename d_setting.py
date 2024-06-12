@@ -3,7 +3,8 @@ import pandas as pd
 
 # Model Settings
 ModelMethod = "COBYLA"
-InitialGuessVelocity = 26 # m/s (Total average speed)
+# ModelMethod = "trust-constr"
+InitialGuessVelocity = 22 # m/s (Total average speed)
 
 # Day-wise race time
 RaceStartTime = 8 * 3600  # 8:00 am
@@ -21,17 +22,20 @@ TimeOffset = 0
 # DF_WayPoints = [0, 57, 102, 169, 207, 254, 301, 371, 415, 464, 520]
 
 #InitialBatteryCapacity = d_config.BATTERY_CAPACITY
-InitialBatteryCapacity = None
-FinalBatteryCapacity = None
-route_df = pd.read_csv("raw_route_data.csv")
+#InitialBatteryCapacity = None
+InitialBatteryCapacity_list = [100, 80, 60, 60, 40]
+# route_df = pd.read_csv("raw_route_data.csv")
+route_df = pd.read_csv("processed_route_data.csv")
 
 
-def set_day(day_no, present_battery_cent, time_offset = 0):
+def set_day(day_no, present_battery_cent, i, time_offset = 0):
     global InitialBatteryCapacity, FinalBatteryCapacity, Day, TimeOffset
     Day = day_no
     TimeOffset = time_offset
     present_battery_cap = (present_battery_cent / 100) * d_config.BATTERY_CAPACITY
     InitialBatteryCapacity = present_battery_cap # Wh
+    #InitialBatteryCapacity  = InitialBatteryCapacity_list[i] / 100 * d_config.BATTERY_CAPACITY # Wh
+    #FinalBatteryCapacity = (FinalBatteryCapacity_list[i] / 100) * d_config.BATTERY_CAPACITY
 
     #FinalBatteryCapacity = d  # Wh
     
