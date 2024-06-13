@@ -3,7 +3,7 @@ from dash import dcc, html
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
-
+from preprocess import find_control_stops
 import d_config
 
 # Custom CSS styles
@@ -24,7 +24,7 @@ external_stylesheets = [
 # Initialize Dash app
 def create_app(
         cum_dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d
+        energy_consumption_profile, solar_profile, cum_d, t_control_stops
     ):
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -51,17 +51,16 @@ def create_app(
                     'data': [
                         go.Scatter(x=cum_dt, y=velocity_profile, mode='lines+markers', name='Velocity'),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.MAX_V, d_config.MAX_V], mode='lines', name="Max Velocity", line=dict(color='red', dash='dot')),
-                        # go.Scatter(x=[322000, 322000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[588000, 588000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        
-                        # go.Scatter(x=[987000, 987000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[1210000, 1210000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[1493000, 1493000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[1766000, 1766000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[2178000, 2178000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[2432000, 2432000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[2720000, 2720000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[max(dt), max(dt)], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[max(cum_dt), max(cum_dt)], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                     ],
                     'layout': go.Layout(title='Velocity Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Velocity'})
                 },
@@ -111,15 +110,15 @@ def create_app(
                         go.Scatter(x=cum_dt, y=battery_profile, mode='lines+markers', name='Battery'),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[100, 100], mode='lines', name="Max Battery Level", line=dict(color='red', dash='dot')),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.DISCHARGE_CAP*100, d_config.DISCHARGE_CAP*100], mode='lines', name="Minimum battery Level", line=dict(color='orange', dash='dot')),
-                        # go.Scatter(x=[322000, 322000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[588000, 588000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[987000, 987000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[1210000, 1210000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[1493000, 1493000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[1766000, 1766000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[2178000, 2178000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[2432000, 2432000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[2720000, 2720000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                     ],
                     'layout': go.Layout(title='Battery Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Battery Level'})
                 },
@@ -162,15 +161,15 @@ def create_app(
                 figure={
                     'data': [
                         go.Scatter(x=cum_dt, y=cum_d, mode='lines+markers', name='Time'),
-                    #     go.Scatter(x=[322000, 322000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[588000, 588000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[987000, 987000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[1210000, 1210000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[1493000, 1493000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[1766000, 1766000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[2178000, 2178000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[2432000, 2432000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                    #     go.Scatter(x=[2720000, 2720000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                      ],
                     'layout': go.Layout(title='Distance Time Correlation', xaxis={'title': 'Time'}, yaxis={'title': 'Distance'})
                 },
@@ -184,11 +183,11 @@ def create_app(
 if __name__ == '__main__':
     output = pd.read_csv("run_dat.csv").fillna(0)
     cum_dt, velocity_profile, acceleration_profile, battery_profile, energy_consumption_profile, solar_profile, cum_d = map(np.array, (output[c] for c in output.columns.to_list()))
-
+    t_control_stops = find_control_stops(output)
     # dx = dx.cumsum()
 
     app = create_app(
         cum_dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d
+        energy_consumption_profile, solar_profile, cum_d, t_control_stops
     )
     app.run_server(debug=True)
