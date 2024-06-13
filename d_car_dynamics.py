@@ -13,6 +13,7 @@ def calculate_dx(start_speed, stop_speed, dt):
 
     return dx
 
+    
 def convert_domain_d2t(velocity_profile, route_df, dt):
 
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)

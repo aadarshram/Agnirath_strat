@@ -23,8 +23,8 @@ external_stylesheets = [
 
 # Initialize Dash app
 def create_app(
-        dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, dx
+        cum_dt, velocity_profile, acceleration_profile, battery_profile,
+        energy_consumption_profile, solar_profile, cum_d
     ):
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -49,8 +49,8 @@ def create_app(
                 id='velocity-profile',
                 figure={
                     'data': [
-                        go.Scatter(x=dt, y=velocity_profile, mode='lines+markers', name='Velocity'),
-                        go.Scatter(x=[min(dt), max(dt)], y=[d_config.MAX_V, d_config.MAX_V], mode='lines', name="Max Velocity", line=dict(color='red', dash='dot')),
+                        go.Scatter(x=cum_dt, y=velocity_profile, mode='lines+markers', name='Velocity'),
+                        go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.MAX_V, d_config.MAX_V], mode='lines', name="Max Velocity", line=dict(color='red', dash='dot')),
                         # go.Scatter(x=[322000, 322000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         # go.Scatter(x=[588000, 588000], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         
@@ -71,9 +71,9 @@ def create_app(
             # Textual summary next to velocity profile
             html.Div([
                 html.H2("Summary", style={'text-align': 'center', 'font-family': '"Space Grotesk", sans-serif'}),
-                html.P(f"Total Distance: {round(np.sum(dx) / 1000, 3)} km"),
-                html.P(f"Time Taken: {dt[-1]//3600}hrs {(dt[-1]%3600)//60}mins {round(((dt[-1]%3600)%60), 3)}secs"),
-                html.P(f"No of points: {len(dt)}pts"),
+                html.P(f"Total Distance: {round(cum_d[-1], 2)} km"),
+                html.P(f"Time Taken: {cum_dt[-1]//3600}hrs {(cum_dt[-1]%3600)//60}mins {round(((cum_dt[-1]%3600)%60), 3)}secs"),
+                html.P(f"No of points: {len(cum_dt)}pts"),
 
             ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top', 'padding-left': '20px', **custom_styles}),
             
@@ -99,7 +99,7 @@ def create_app(
             dcc.Graph(
                 id='acceleration-profile',
                 figure={
-                    'data': [go.Scatter(x=dt[1:], y=acceleration_profile[1:], mode='lines+markers', name='Acceleration')],
+                    'data': [go.Scatter(x=cum_dt[1:], y=acceleration_profile[1:], mode='lines+markers', name='Acceleration')],
                     'layout': go.Layout(title='Acceleration Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Acceleration'})
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
@@ -108,9 +108,9 @@ def create_app(
                 id='battery-profile',
                 figure={
                     'data': [
-                        go.Scatter(x=dt, y=battery_profile, mode='lines+markers', name='Battery'),
-                        go.Scatter(x=[min(dt), max(dt)], y=[100, 100], mode='lines', name="Max Battery Level", line=dict(color='red', dash='dot')),
-                        go.Scatter(x=[min(dt), max(dt)], y=[d_config.DISCHARGE_CAP*100, d_config.DISCHARGE_CAP*100], mode='lines', name="Minimum battery Level", line=dict(color='orange', dash='dot')),
+                        go.Scatter(x=cum_dt, y=battery_profile, mode='lines+markers', name='Battery'),
+                        go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[100, 100], mode='lines', name="Max Battery Level", line=dict(color='red', dash='dot')),
+                        go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.DISCHARGE_CAP*100, d_config.DISCHARGE_CAP*100], mode='lines', name="Minimum battery Level", line=dict(color='orange', dash='dot')),
                         # go.Scatter(x=[322000, 322000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         # go.Scatter(x=[588000, 588000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         # go.Scatter(x=[987000, 987000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
@@ -128,7 +128,7 @@ def create_app(
             dcc.Graph(
                 id='energy-consumption-profile',
                 figure={
-                    'data': [go.Scatter(x=dt[1:], y=energy_consumption_profile[1:], mode='lines+markers', name='Energy Consumption')],
+                    'data': [go.Scatter(x=cum_dt[1:], y=energy_consumption_profile[1:], mode='lines+markers', name='Energy Consumption')],
                     'layout': go.Layout(title='Energy Consumption Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Energy Consumption'})
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
@@ -136,7 +136,7 @@ def create_app(
             dcc.Graph(
                 id='solar-profile',
                 figure={
-                    'data': [go.Scatter(x=dt[1:], y=solar_profile[1:], mode='lines+markers', name='Solar')],
+                    'data': [go.Scatter(x=cum_dt[1:], y=solar_profile[1:], mode='lines+markers', name='Solar')],
                     'layout': go.Layout(title='Solar Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Solar Energy'})
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
@@ -144,7 +144,7 @@ def create_app(
             dcc.Graph(
                 id='net-energy-consumption-profile',
                 figure={
-                    'data': [go.Scatter(x=dt[1:], y=energy_consumption_profile[1:].cumsum(), mode='lines+markers', name='Energy Consumption')],
+                    'data': [go.Scatter(x=cum_dt[1:], y=energy_consumption_profile[1:].cumsum(), mode='lines+markers', name='Energy Consumption')],
                     'layout': go.Layout(title='Net Energy Consumption Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Energy Consumption'})
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
@@ -152,7 +152,7 @@ def create_app(
             dcc.Graph(
                 id='net-solar-profile',
                 figure={
-                    'data': [go.Scatter(x=dt[1:], y=solar_profile[1:].cumsum(), mode='lines+markers', name='Solar')],
+                    'data': [go.Scatter(x=cum_dt[1:], y=solar_profile[1:].cumsum(), mode='lines+markers', name='Solar')],
                     'layout': go.Layout(title='Net Solar Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Solar Energy'})
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
@@ -161,7 +161,7 @@ def create_app(
                 id='dx-profile',
                 figure={
                     'data': [
-                        go.Scatter(x=dt, y=dx, mode='lines+markers', name='Time'),
+                        go.Scatter(x=cum_dt, y=cum_d, mode='lines+markers', name='Time'),
                     #     go.Scatter(x=[322000, 322000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                     #     go.Scatter(x=[588000, 588000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                     #     go.Scatter(x=[987000, 987000], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
@@ -183,12 +183,12 @@ def create_app(
 
 if __name__ == '__main__':
     output = pd.read_csv("run_dat.csv").fillna(0)
-    cum_dt, velocity_profile, acceleration_profile, battery_profile, energy_consumption_profile, solar_profile, dx = map(np.array, (output[c] for c in output.columns.to_list()))
+    cum_dt, velocity_profile, acceleration_profile, battery_profile, energy_consumption_profile, solar_profile, cum_d = map(np.array, (output[c] for c in output.columns.to_list()))
 
     # dx = dx.cumsum()
 
     app = create_app(
         cum_dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, dx
+        energy_consumption_profile, solar_profile, cum_d
     )
     app.run_server(debug=True)

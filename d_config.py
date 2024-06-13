@@ -23,7 +23,7 @@ FRONTAL_AREA = 1 # m^2
 
 # Battery
 
-BATTERY_CAPACITY = 3 * K # Wh
+BATTERY_CAPACITY = 3.055 * K # Wh
 DISCHARGE_CAP = 0.2 # Below this fraction of battery -> deep discharge
 
 # Motor
@@ -45,7 +45,7 @@ BUS_VOLTAGE = 4.2 * 38 # V
 
 CD = 0.092
 CDA = 0.093 # Drag Area = Aerodynamic coefficient * Fronal area
-ZERO_SPEED_CRR = 0.0045 
+ZERO_SPEED_CRR = 0.005 
 
 # Other constants
 
@@ -61,7 +61,7 @@ MAX_CURRENT = 12.3 # A
 
 # Race config
 
-RACE_DISTANCE = 3000 # km
+RACE_DISTANCE = 3047 # km
 RACE_TIME = 5 * DAY # s
 
 # ---------------------------------------------------------------------------------------------

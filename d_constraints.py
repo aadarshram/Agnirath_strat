@@ -27,7 +27,9 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     '''
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
     #Min_B, B_bar = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
-    return np.abs(3000 * 10**3 - cum_d - np.sum(dx)) 
+    return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
+    #return np.abs(6 * 10**3 - np.sum(dx)) 
+
 #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
 
 def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array):
