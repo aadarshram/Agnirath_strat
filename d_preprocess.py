@@ -53,3 +53,9 @@ def add_control_stops(run_dat):
     run_dat = run_dat.sort_values(by = 'Time', ignore_index = True)
 
     return run_dat
+
+def find_reachtime(cum_dt, cum_d):
+    for i  in range(len(cum_d)):
+        if cum_d[i] > 3000:
+            return cum_dt[i]
+    return None

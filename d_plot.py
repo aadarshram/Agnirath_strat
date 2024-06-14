@@ -3,7 +3,7 @@ from dash import dcc, html
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
-from d_preprocess import find_control_stops
+from d_preprocess import find_control_stops, find_reachtime
 import d_config
 
 # Custom CSS styles
@@ -24,7 +24,7 @@ external_stylesheets = [
 # Initialize Dash app
 def create_app(
         cum_dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, t_control_stops
+        energy_consumption_profile, solar_profile, cum_d, t_control_stops, t
     ):
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -49,13 +49,13 @@ def create_app(
                 id='velocity-profile',
                 figure={
                     'data': [
-                        go.Scatter(x=cum_dt, y=velocity_profile, mode='lines+markers', name='Velocity'),
+                        go.Scatter(x=cum_dt, y=velocity_profile, mode='lines+markers', name='Velocity '),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.MAX_V, d_config.MAX_V], mode='lines', name="Max Velocity", line=dict(color='red', dash='dot')),
-                        go.Scatter(x=[9 * 3600, 9 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
-                        go.Scatter(x=[18 * 3600, 18 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
-                        go.Scatter(x=[27 * 3600, 27 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
-                        go.Scatter(x=[36 * 3600, 36 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
-                        go.Scatter(x=[45 * 3600, 45 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[9, 9], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[18, 18], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[27, 27], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[36, 36], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[45, 45], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
@@ -66,8 +66,10 @@ def create_app(
                         go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[max(cum_dt), max(cum_dt)], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t, t], y=[0, d_config.MAX_V], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
+
                     ],
-                    'layout': go.Layout(title='Velocity Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Velocity'})
+                    'layout': go.Layout(title='Velocity Profile', xaxis={'title': 'Time (hr)'}, yaxis={'title': 'Velocity (m/s)'})
                 },
                 style={'width': '93%', 'display': 'inline-block', 'vertical-align': 'top', **custom_styles}
             ),
@@ -76,7 +78,7 @@ def create_app(
             html.Div([
                 html.H2("Summary", style={'text-align': 'center', 'font-family': '"Space Grotesk", sans-serif'}),
                 html.P(f"Total Distance: {round(cum_d[-1], 2)} km"),
-                html.P(f"Time Taken: {cum_dt[-1]//3600}hrs {(cum_dt[-1]%3600)//60}mins {round(((cum_dt[-1]%3600)%60), 3)}secs"),
+                html.P(f"Time Taken: {(cum_dt[-1]*3600)//3600}hrs {((cum_dt[-1]*3600)%3600)//60}mins {round((((cum_dt[-1]*3600)%3600)%60), 3)}secs"),
                 html.P(f"No of points: {len(cum_dt)}pts"),
 
             ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top', 'padding-left': '20px', **custom_styles}),
@@ -115,6 +117,11 @@ def create_app(
                         go.Scatter(x=cum_dt, y=battery_profile, mode='lines+markers', name='Battery'),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[100, 100], mode='lines', name="Max Battery Level", line=dict(color='red', dash='dot')),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.DISCHARGE_CAP*100, d_config.DISCHARGE_CAP*100], mode='lines', name="Minimum battery Level", line=dict(color='orange', dash='dot')),
+                        go.Scatter(x=[9, 9], y=[0, 100], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[18, 18], y=[0, 100], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[27, 27], y=[0, 100], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[36, 36], y=[0, 100], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[45, 45], y=[0, 100], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
@@ -124,6 +131,8 @@ def create_app(
                         go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 100], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t, t], y=[0, 100], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
+
                     ],
                     'layout': go.Layout(title='Battery Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Battery Level'})
                 },
@@ -166,6 +175,11 @@ def create_app(
                 figure={
                     'data': [
                         go.Scatter(x=cum_dt, y=cum_d, mode='lines+markers', name='Time'),
+                        go.Scatter(x=[9, 9], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[18, 18], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[27, 27], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[36, 36], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[45, 45], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
@@ -175,6 +189,9 @@ def create_app(
                         go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[3000, 3000], mode='lines', name='ControlStop', line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t, t], y=[0, 3000], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
+          
                      ],
                     'layout': go.Layout(title='Distance Time Correlation', xaxis={'title': 'Time'}, yaxis={'title': 'Distance'})
                 },
@@ -191,9 +208,9 @@ if __name__ == '__main__':
     cum_dt, velocity_profile, acceleration_profile, battery_profile, energy_consumption_profile, solar_profile, cum_d = map(np.array, (output[c] for c in output.columns.to_list()))
     t_control_stops = find_control_stops(run_dat)
     # dx = dx.cumsum()
-
+    t_end = find_reachtime(cum_dt, cum_d)
     app = create_app(
-        cum_dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, t_control_stops
+        cum_dt / 3600, velocity_profile, acceleration_profile, battery_profile,
+        energy_consumption_profile, solar_profile, cum_d, t_control_stops / 3600, t_end / 3600
     )
     app.run_server(debug=True)
