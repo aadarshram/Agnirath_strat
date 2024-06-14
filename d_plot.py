@@ -51,6 +51,11 @@ def create_app(
                     'data': [
                         go.Scatter(x=cum_dt, y=velocity_profile, mode='lines+markers', name='Velocity'),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[d_config.MAX_V, d_config.MAX_V], mode='lines', name="Max Velocity", line=dict(color='red', dash='dot')),
+                        go.Scatter(x=[9 * 3600, 9 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[18 * 3600, 18 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[27 * 3600, 27 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[36 * 3600, 36 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
+                        go.Scatter(x=[45 * 3600, 45 * 3600], y=[0, d_config.MAX_V], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, d_config.MAX_V], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
@@ -181,9 +186,10 @@ def create_app(
     return app
 
 if __name__ == '__main__':
-    output = pd.read_csv("run_dat.csv").fillna(0)
+    output = pd.read_csv("final_run_dat.csv").fillna(0)
+    run_dat = pd.read_csv("run_dat.csv").fillna(0)
     cum_dt, velocity_profile, acceleration_profile, battery_profile, energy_consumption_profile, solar_profile, cum_d = map(np.array, (output[c] for c in output.columns.to_list()))
-    t_control_stops = find_control_stops(output)
+    t_control_stops = find_control_stops(run_dat)
     # dx = dx.cumsum()
 
     app = create_app(

@@ -9,7 +9,8 @@ InitialGuessVelocity = 22 # m/s (Total average speed)
 # Day-wise race time
 RaceStartTime = 8 * 3600  # 8:00 am
 RaceEndTime = 17 * 3600  # 5:00 pm
-DT = RaceEndTime - RaceStartTime
+Control_stop_time = 0.5 * 3600 # s
+DT = RaceEndTime - RaceStartTime - 2 * Control_stop_time
 
 Day = 1
 TimeOffset = 0
@@ -29,7 +30,7 @@ route_df = pd.read_csv("processed_route_data.csv")
 discharge_list= [80.8, 48.8, 40.8, 27.7, 20]
 
 def set_day(day_no, present_battery_cent, i, time_offset = 0):
-    global InitialBatteryCapacity, FinalBatteryCapacity, Day, TimeOffset,DISCHARGE_CAP
+    global InitialBatteryCapacity, Day, TimeOffset,DISCHARGE_CAP
     Day = day_no
     TimeOffset = time_offset
     # DISCHARGE_CAP = discharge_list[i]/100

@@ -7,7 +7,7 @@ from d_solar import calc_solar_irradiance
 from d_offrace_solarcalc import calculate_energy
 
 df_list = []
-T = d_setting.RaceEndTime - d_setting.RaceStartTime
+T = d_setting.RaceEndTime - d_setting.RaceStartTime -  2 * d_setting.Control_stop_time
 day_counter = 1
 time_counter = 0
 CONTROL_STOP_DURATION = 30 * 60
@@ -55,7 +55,7 @@ for i in range(5):
 
     d_setting.set_day(day_counter, present_battery_cent, i, time_counter)
 
-    outdf, timetaken = main(d_setting.route_df, cum_d)
+    outdf, timetaken = main(d_setting.route_df, cum_d, i)
     outdf['Time'] = outdf['Time'] + T * i
     outdf['Cumulative Distance'] += cum_d 
     df_list.append(outdf)
