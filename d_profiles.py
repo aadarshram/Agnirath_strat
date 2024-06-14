@@ -5,7 +5,7 @@ import d_setting
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 
-def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array):
+def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws,wd):
     # convert data to time domain
     slope_array, lattitude_array, longitude_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array }), dt)
 
@@ -14,7 +14,7 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
     avg_speed = (start_speeds + stop_speeds) / 2
     acceleration = (stop_speeds - start_speeds) / dt
 
-    P_net,_ = calculate_power_req(avg_speed, acceleration, slope_array)
+    P_net,_ = calculate_power_req(avg_speed, acceleration, slope_array,ws,wd)
     P_solar = calculate_incident_solarpower(dt.cumsum() + d_setting.TimeOffset, lattitude_array, longitude_array)
 
     energy_consumption = P_net * dt /3600

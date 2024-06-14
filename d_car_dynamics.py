@@ -21,16 +21,20 @@ def convert_domain_d2t(velocity_profile, route_df, dt):
 
     nearest_cum_dist = pd.merge_asof(pd.DataFrame({'distance': cum_distance}), route_df['CumulativeDistance(km)'], left_on = 'distance',  right_on = 'CumulativeDistance(km)', direction = 'nearest')
     result = pd.merge(nearest_cum_dist, route_df, on = 'CumulativeDistance(km)')
-    return np.array(result['Slope']), np.array(result['Lattitude']), np.array(result['Longitude'])
     
-def calculate_power_req(speed, acceleration, slope):
+    try:
+        return np.array(result['Slope']), np.array(result['Lattitude']), np.array(result['Longitude'])
+    except:
+        return result
+    
+def calculate_power_req(speed, acceleration, slope,ws,wd):
     '''
     Calculate Power required by Car
     '''
 
     # Resistive torque on motor
     friction_torque = ZERO_SPEED_CRR * CAR_MASS * GRAVITY * np.cos(np.radians(slope)) * OUTER_WHEEL_RADIUS # Neglecting Dynamic Crr as it's order 1/100 th of static
-    drag_torque = 0.5 * CDA * AIR_DENSITY * (speed ** 2) * OUTER_WHEEL_RADIUS
+    drag_torque = 0.5 * CDA * AIR_DENSITY * ((speed**2+ws**2-2*speed*ws*np.cos(np.radians(wd))))* OUTER_WHEEL_RADIUS
     # t = r_out * ((m * 9.81 * u1) + (0.5 * Cd * a * rho * (omega ** 2) * (r_out ** 2)))
     net_resistance_torque = friction_torque + drag_torque
 

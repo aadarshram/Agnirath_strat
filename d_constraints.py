@@ -14,7 +14,7 @@ from d_preprocess import find_control_stops
 
 SAFE_BATTERY_LEVEL = BATTERY_CAPACITY * DISCHARGE_CAP
 MAX_P = BUS_VOLTAGE * MAX_CURRENT
-
+route_df1=pd.read_csv('wind_data.csv')
 # Bounds for the velocity
 def get_bounds(N):
     '''
@@ -34,10 +34,14 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
 
 #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
 
-def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i):
+def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i,route_df1=pd.read_csv('wind_data.csv')):
     '''
     Battery safety and acceleration constraint
     '''
+
+ 
+
+   
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
     cum_d1 = dx.cumsum() + cum_d
     cum_t = dt.cumsum() + i * (9 * 3600)
@@ -49,8 +53,11 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     start_speeds, stop_speeds = velocity_profile[:-1], velocity_profile[1:]
     acceleration = (stop_speeds - start_speeds) / dt
     avg_speed = (start_speeds + stop_speeds) / 2
-
-    P_total, P_resistance = calculate_power_req(avg_speed, acceleration, slope_array)
+    route_df=route_df1
+    route_df=convert_domain_d2t(velocity_profile, route_df1.iloc[::310863], dt)
+    ws=route_df["WindSpeed(m/s)"]
+    wd=route_df["Winddirection(frmnorth)"]
+    P_total, P_resistance = calculate_power_req(avg_speed, acceleration, slope_array,ws,wd)
     P_solar = calculate_incident_solarpower(dt.cumsum() + d_setting.TimeOffset, lattitude_array, longitude_array)
     
     for gt in control_stop_array:
@@ -68,7 +75,7 @@ def final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lat
     Finish recommended batery each day
     '''
     # Change the domain of slope, lat, lon to time
-
+    
     slope_array, lattitude_array, longitude_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array }), dt)
     start_speeds, stop_speeds = velocity_profile[:-1], velocity_profile[1:]
     

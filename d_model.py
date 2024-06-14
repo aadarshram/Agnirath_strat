@@ -4,7 +4,7 @@ Main model
 import numpy as np
 from scipy.optimize import minimize
 import pandas as pd
-from d_car_dynamics import calculate_dx
+from d_car_dynamics import calculate_dx,convert_domain_d2t
 import d_setting
 from d_constraints import get_bounds, objective, battery_and_acc_constraint, final_battery_constraint, v_end
 from d_profiles import extract_profiles
@@ -75,11 +75,14 @@ def main(route_df, cum_d, i):
     distance_travelled = np.sum(dx)
     print("done.")
     print("Total distance travelled for race:", distance_travelled, "km in travel time:", dt.sum() / 3600, 'hrs')
-
+    route_df1=pd.read_csv('wind_data.csv')
+    route_df=convert_domain_d2t(optimised_velocity_profile, route_df1.iloc[::310863], dt)
+    ws=route_df["WindSpeed(m/s)"]
+    wd=route_df["Winddirection(frmnorth)"]
     outdf = pd.DataFrame(
         dict(zip(
             ['Time', 'Velocity', 'Acceleration', 'Battery', 'EnergyConsumption', 'Solar', 'Cumulative Distance'],
-            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
+            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws,wd)
         ))
     )
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum()])
