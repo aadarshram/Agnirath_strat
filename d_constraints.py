@@ -32,15 +32,14 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
     return - np.sum(dx)
 
-#+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
-
-def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i,route_df1=pd.read_csv('wind_data.csv')):
+#+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 
+def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i):
     '''
     Battery safety and acceleration constraint
     '''
 
  
-
+    
    
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
     cum_d1 = dx.cumsum() + cum_d
@@ -48,15 +47,13 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     dat = pd.DataFrame({'Cumulative Distance': cum_d1, 'Time': cum_t})
     control_stop_array =  find_control_stops(dat)
 
-    slope_array, lattitude_array, longitude_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array }), dt)
+    slope_array, lattitude_array, longitude_array,ws,wd = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array,'wind speed':ws_array,'wind angle':wd_array }), dt)
 
     start_speeds, stop_speeds = velocity_profile[:-1], velocity_profile[1:]
     acceleration = (stop_speeds - start_speeds) / dt
     avg_speed = (start_speeds + stop_speeds) / 2
-    route_df=route_df1
-    route_df=convert_domain_d2t(velocity_profile, route_df1.iloc[::310863], dt)
-    ws=route_df["WindSpeed(m/s)"]
-    wd=route_df["Winddirection(frmnorth)"]
+   
+
     P_total, P_resistance = calculate_power_req(avg_speed, acceleration, slope_array,ws,wd)
     P_solar = calculate_incident_solarpower(dt.cumsum() + d_setting.TimeOffset, lattitude_array, longitude_array)
     
@@ -70,19 +67,19 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     return (10 ** 6) * np.min(battery_profile), (BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile), MAX_P - np.max(P_total) # Ensure battery level never falls below safe level and exceeds total capacity 
 
 
-def final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array):
+def final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array):
     '''
     Finish recommended batery each day
     '''
     # Change the domain of slope, lat, lon to time
     
-    slope_array, lattitude_array, longitude_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array }), dt)
+    slope_array, lattitude_array, longitude_array,ws,wd = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array,'wind speed':ws_array,'wind angle':wd_array }), dt)
     start_speeds, stop_speeds = velocity_profile[:-1], velocity_profile[1:]
     
     avg_speed = (start_speeds + stop_speeds) / 2
     acceleration = (stop_speeds - start_speeds) / dt
 
-    P_net, _= calculate_power_req(avg_speed, acceleration, slope_array)
+    P_net, _= calculate_power_req(avg_speed, acceleration, slope_array,ws,wd)
     P_solar = calculate_incident_solarpower(dt.cumsum() + d_setting.TimeOffset, lattitude_array, longitude_array)
 
     energy_consumption = ((P_net - P_solar) * dt).cumsum() / 3600

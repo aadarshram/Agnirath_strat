@@ -5,9 +5,9 @@ import d_setting
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 
-def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws,wd):
+def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array):
     # convert data to time domain
-    slope_array, lattitude_array, longitude_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array }), dt)
+    slope_array, lattitude_array, longitude_array,ws,wd = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array,'wind speed':ws_array,'wind angle':wd_array }), dt)
 
     start_speeds, stop_speeds = velocity_profile[:-1], velocity_profile[1:]
     

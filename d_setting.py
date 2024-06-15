@@ -4,7 +4,7 @@ import pandas as pd
 # Model Settings
 ModelMethod = "COBYLA"
 # ModelMethod = "trust-constr"
-InitialGuessVelocity = 22 # m/s (Total average speed)
+InitialGuessVelocity = 20 # m/s (Total average speed)
 
 # Day-wise race time
 RaceStartTime = 8 * 3600  # 8:00 am

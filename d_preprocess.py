@@ -58,4 +58,6 @@ def find_reachtime(cum_dt, cum_d):
     for i  in range(len(cum_d)):
         if cum_d[i] > 3000:
             return cum_dt[i]
+        else:
+            return cum_d[-1]
     return None

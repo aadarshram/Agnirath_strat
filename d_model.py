@@ -22,6 +22,8 @@ def main(route_df, cum_d, i):
     slope_array = route_df.iloc[:, 2].to_numpy()
     lattitude_array = route_df.iloc[:, 3].to_numpy()
     longitude_array = route_df.iloc[:, 4].to_numpy()
+    ws_array = route_df.iloc[:, 5].to_numpy()
+    wd_array = route_df.iloc[:, 6].to_numpy()
 
     N_V = int(N) + 1
     
@@ -34,16 +36,16 @@ def main(route_df, cum_d, i):
             "type": "ineq",
             "fun": battery_and_acc_constraint,
             "args": (
-                dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i
+                dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i
             )
         },
         # {
-        #     "type": "ineq",
-        #     "fun": final_battery_constraint,
-        #     "args": (
-        #         dt, cum_d_array, slope_array, lattitude_array, longitude_array
-        #     )
-        # },
+         #    "type": "ineq",
+          #   "fun": final_battery_constraint,
+           #  "args": (
+            #     dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array
+             #
+             # },
         {
             "type": "ineq",
             "fun": v_end,
@@ -75,14 +77,13 @@ def main(route_df, cum_d, i):
     distance_travelled = np.sum(dx)
     print("done.")
     print("Total distance travelled for race:", distance_travelled, "km in travel time:", dt.sum() / 3600, 'hrs')
-    route_df1=pd.read_csv('wind_data.csv')
-    route_df=convert_domain_d2t(optimised_velocity_profile, route_df1.iloc[::310863], dt)
-    ws=route_df["WindSpeed(m/s)"]
-    wd=route_df["Winddirection(frmnorth)"]
+    
+   
+  
     outdf = pd.DataFrame(
         dict(zip(
             ['Time', 'Velocity', 'Acceleration', 'Battery', 'EnergyConsumption', 'Solar', 'Cumulative Distance'],
-            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws,wd)
+            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array)
         ))
     )
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum()])

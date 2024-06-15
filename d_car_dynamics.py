@@ -22,10 +22,9 @@ def convert_domain_d2t(velocity_profile, route_df, dt):
     nearest_cum_dist = pd.merge_asof(pd.DataFrame({'distance': cum_distance}), route_df['CumulativeDistance(km)'], left_on = 'distance',  right_on = 'CumulativeDistance(km)', direction = 'nearest')
     result = pd.merge(nearest_cum_dist, route_df, on = 'CumulativeDistance(km)')
     
-    try:
-        return np.array(result['Slope']), np.array(result['Lattitude']), np.array(result['Longitude'])
-    except:
-        return result
+    
+    return np.array(result['Slope']), np.array(result['Lattitude']), np.array(result['Longitude']),np.array(result['wind speed']),np.array(result['wind angle'])
+
     
 def calculate_power_req(speed, acceleration, slope,ws,wd):
     '''
