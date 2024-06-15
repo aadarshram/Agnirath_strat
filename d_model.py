@@ -45,7 +45,7 @@ def main(route_df, cum_d, i):
            #  "args": (
             #     dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array
              #
-             # },
+             # }
         {
             "type": "ineq",
             "fun": v_end,
@@ -62,12 +62,12 @@ def main(route_df, cum_d, i):
     optimised_velocity_profile = minimize(
         objective, 
         initial_velocity_profile,
-        args = (dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d
+        args = (dt
                 ),
         bounds = bounds,
         method = d_setting.ModelMethod,
         constraints = constraints,
-        # options = {'catol': 10 ** -6, 'disp': True, 'maxiter': 10 ** 5}
+         options = {'maxiter':3000,'tol':1e-2,'disp':True}
         #options = {'verbose': 3}
     )
     optimised_velocity_profile = np.array(optimised_velocity_profile.x) * 1 # derive the velocity profile

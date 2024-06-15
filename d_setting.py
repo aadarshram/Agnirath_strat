@@ -4,7 +4,7 @@ import pandas as pd
 # Model Settings
 ModelMethod = "COBYLA"
 # ModelMethod = "trust-constr"
-InitialGuessVelocity = 20 # m/s (Total average speed)
+InitialGuessVelocity = 20# m/s (Total average speed)
 
 # Day-wise race time
 RaceStartTime = 8 * 3600  # 8:00 am
@@ -34,7 +34,7 @@ def set_day(day_no, present_battery_cent, i, time_offset = 0):
     Day = day_no
     TimeOffset = time_offset
     # DISCHARGE_CAP = discharge_list[i]/100
-    DISCHARGE_CAP = 0.2
+    DISCHARGE_CAP = 0
     present_battery_cap = (present_battery_cent / 100) * d_config.BATTERY_CAPACITY
     InitialBatteryCapacity = present_battery_cap # Wh
     #InitialBatteryCapacity  = InitialBatteryCapacity_list[i] / 100 * d_config.BATTERY_CAPACITY # Wh

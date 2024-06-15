@@ -14,7 +14,7 @@ from d_preprocess import find_control_stops
 
 SAFE_BATTERY_LEVEL = BATTERY_CAPACITY * DISCHARGE_CAP
 MAX_P = BUS_VOLTAGE * MAX_CURRENT
-route_df1=pd.read_csv('wind_data.csv')
+
 # Bounds for the velocity
 def get_bounds(N):
     '''
@@ -22,7 +22,7 @@ def get_bounds(N):
     '''
     return ([(0, 0)] + [(0.01, MAX_V)] * (N-2) + [(0, 0)]) # Start and end velocity is zero
 
-def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d
+def objective(velocity_profile, dt
               ):
     '''
     Maximize total distance travelled
@@ -30,7 +30,7 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
     #Min_B, B_bar = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
-    return - np.sum(dx)
+    return - np.sum(dx)*10**2
 
 #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 
 def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i):
@@ -64,7 +64,7 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     energy_consumed = ((P_total - P_solar) * dt).cumsum() / 3600 # Wh
     battery_profile = d_setting.InitialBatteryCapacity - energy_consumed - SAFE_BATTERY_LEVEL
 
-    return (10 ** 6) * np.min(battery_profile), (BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile), MAX_P - np.max(P_total) # Ensure battery level never falls below safe level and exceeds total capacity 
+    return   np.min(battery_profile)/np.abs(np.min(battery_profile)),(((BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile)))/np.abs(((BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile))), (MAX_P - np.max(P_total))# Ensure battery level never falls below safe level and exceeds total capacity 
 
 
 def final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array):

@@ -33,7 +33,7 @@ def calculate_power_req(speed, acceleration, slope,ws,wd):
 
     # Resistive torque on motor
     friction_torque = ZERO_SPEED_CRR * CAR_MASS * GRAVITY * np.cos(np.radians(slope)) * OUTER_WHEEL_RADIUS # Neglecting Dynamic Crr as it's order 1/100 th of static
-    drag_torque = 0.5 * CDA * AIR_DENSITY * ((speed**2+ws**2-2*speed*ws*np.cos(np.radians(wd))))* OUTER_WHEEL_RADIUS
+    drag_torque = 0.5 * CDA * AIR_DENSITY * ((speed**2+ws**2+2*speed*ws*np.cos(np.radians(wd))))* OUTER_WHEEL_RADIUS
     # t = r_out * ((m * 9.81 * u1) + (0.5 * Cd * a * rho * (omega ** 2) * (r_out ** 2)))
     net_resistance_torque = friction_torque + drag_torque
 

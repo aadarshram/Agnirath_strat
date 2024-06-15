@@ -15,7 +15,7 @@ for j in range(len(df1)//200):
     df1.iloc[j*200:j*200+200]=pd.concat([df1.iloc[j*200:200*(j+1)].mean(axis=0).transpose()]*200,axis=1).transpose()
 def calc_slope(slope_array,step_array):
    df=pd.DataFrame()
-   df["Slope (deg)"] =[sum(np.tan(slope_array)*step_array)/sum(step_array)]
+   df["Slope (deg)"] =np.arctan([sum(np.tan(np.radians(slope_array))*step_array)/sum(step_array)])*180/np.pi
    return df
 for j in range(len(df1)//200):
    
