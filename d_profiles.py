@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
-from d_config import BATTERY_CAPACITY
-import d_setting
+from d_config import BATTERY_CAPACITY, HR
+from d_setting import DT, CONTROL_STOP_DURATION
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
+from d_offrace_solarcalc import calculate_energy
+from d_helper_fns import find_control_stops
 
-def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array):
+def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, timeoffset):
     # convert data to time domain
     slope_array, lattitude_array, longitude_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array }), dt)
 
@@ -15,18 +17,28 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
     acceleration = (stop_speeds - start_speeds) / dt
 
     P_net,_ = calculate_power_req(avg_speed, acceleration, slope_array)
-    P_solar = calculate_incident_solarpower(dt.cumsum() + d_setting.TimeOffset, lattitude_array, longitude_array)
+    P_solar = calculate_incident_solarpower(dt.cumsum() + timeoffset, lattitude_array, longitude_array)
 
-    energy_consumption = P_net * dt /3600
-    energy_gain = P_solar * dt /3600
+    dx = calculate_dx(start_speeds, stop_speeds, dt)
+
+    # Find control stops
+    cum_dtot = dx.cumsum() + cum_d
+    cum_t = dt.cumsum() + i * DT
+    control_stop_array =  find_control_stops((pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})))
+    # Add energy gained through control stop
+    for gt in control_stop_array:
+        t = int(gt % (DT))
+        P_solar[t:] += calculate_energy(t, t + CONTROL_STOP_DURATION)
+
+    energy_consumption = P_net * dt /HR # Wh
+    energy_gain = P_solar * dt /HR # Wh
 
     net_energy_profile = energy_consumption.cumsum() - energy_gain.cumsum()
     
-    battery_profile = d_setting.InitialBatteryCapacity - net_energy_profile
-    battery_profile = np.concatenate((np.array([d_setting.InitialBatteryCapacity]), battery_profile))
+    battery_profile = InitialBatteryCapacity - net_energy_profile
+    battery_profile = np.concatenate((np.array([InitialBatteryCapacity]), battery_profile))
 
     battery_profile = battery_profile * 100 / (BATTERY_CAPACITY)
-    dx = calculate_dx(start_speeds, stop_speeds, dt)
 
     # Matching shapes
     dt =  np.concatenate((np.array([0]), dt))
