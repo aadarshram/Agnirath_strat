@@ -10,7 +10,7 @@ import d_setting
 from d_car_dynamics import calculate_dx, calculate_power_req, convert_domain_d2t
 from d_solar import calculate_incident_solarpower
 from d_offrace_solarcalc import calculate_energy
-from d_preprocess import find_control_stops
+from d_preprocess import find_control_stops#find_control_stops_v
 
 SAFE_BATTERY_LEVEL = BATTERY_CAPACITY * DISCHARGE_CAP
 MAX_P = BUS_VOLTAGE * MAX_CURRENT
@@ -21,17 +21,26 @@ def get_bounds(N):
     Velocity bounds throughout the race
     '''
     return ([(0, 0)] + [(0.01, MAX_V)] * (N-2) + [(0, 0)]) # Start and end velocity is zero
+#def control_stop_constraint(v,cumd):
+    
+   
+    #if v[find_control_stops_v(v,cumd)]!=None:
+ #   k=v[list(find_control_stops_v(v,cumd))]
+    
+  #  return -np.linalg.norm(-v[(find_control_stops_v(v,cumd))])
+    #else:
+     #   return 0
 
-def objective(velocity_profile, dt
-              ):
+def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i):
+              
     '''
     Maximize total distance travelled
     '''
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
-    #Min_B, B_bar = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
+    Min_B, B_bar,max_p = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i)
+    maxbat,max_bat=final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array)
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
-    return - np.sum(dx)*10**2
-
+    return - 1000*np.sum(dx)-10**4*0*Min_B-10*0*(5-i)*B_bar-0*max_p+abs(max_bat)*10**6
 #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 
 def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i):
     '''
@@ -64,7 +73,7 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     energy_consumed = ((P_total - P_solar) * dt).cumsum() / 3600 # Wh
     battery_profile = d_setting.InitialBatteryCapacity - energy_consumed - SAFE_BATTERY_LEVEL
 
-    return   np.min(battery_profile)/np.abs(np.min(battery_profile)),(((BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile)))/np.abs(((BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile))), (MAX_P - np.max(P_total))# Ensure battery level never falls below safe level and exceeds total capacity 
+    return   np.min(battery_profile)/np.abs(np.min(battery_profile)),(((BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile)))/np.abs(((BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile))),(MAX_P - np.max(P_total))# Ensure battery level never falls below safe level and exceeds total capacity 
 
 
 def final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array):
@@ -84,7 +93,7 @@ def final_battery_constraint(velocity_profile, dt, cum_d_array, slope_array, lat
 
     energy_consumption = ((P_net - P_solar) * dt).cumsum() / 3600
     final_battery_lev = d_setting.InitialBatteryCapacity - energy_consumption[-1] - d_setting.FinalBatteryCapacity
-    return final_battery_lev, -final_battery_lev # Excess battery than recommended at each day = 0
+    return 10**4* final_battery_lev, -final_battery_lev*10**4 # Excess battery than recommended at each day = 0
     
 def v_end(velocity_profile, dt, cum_d):
     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)

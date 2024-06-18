@@ -6,12 +6,13 @@ from scipy.optimize import minimize
 import pandas as pd
 from d_car_dynamics import calculate_dx,convert_domain_d2t
 import d_setting
-from d_constraints import get_bounds, objective, battery_and_acc_constraint, final_battery_constraint, v_end
+from d_constraints import get_bounds, objective, battery_and_acc_constraint, final_battery_constraint, v_end#control_stop_constraint
 from d_profiles import extract_profiles
 
 
 
 def main(route_df, cum_d, i):
+    iter_list=[8000,5000,9000,7000,9000]
     # choose dt in whatevr resolution
     DT = d_setting.DT
     step = 200 # s
@@ -39,13 +40,20 @@ def main(route_df, cum_d, i):
                 dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i
             )
         },
-        # {
-         #    "type": "ineq",
-          #   "fun": final_battery_constraint,
-           #  "args": (
-            #     dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array
-             #
-             # }
+       # {
+          #  "type": "ineq",
+           # "fun": control_stop_constraint,
+            ##  cum_d,
+            #)
+        #},
+         {
+             "type": "ineq",
+          "fun": final_battery_constraint,
+             "args": (
+                dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array
+             )
+              
+               },
         {
             "type": "ineq",
             "fun": v_end,
@@ -62,12 +70,12 @@ def main(route_df, cum_d, i):
     optimised_velocity_profile = minimize(
         objective, 
         initial_velocity_profile,
-        args = (dt
+        args = (dt,  cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array, cum_d, i
                 ),
         bounds = bounds,
         method = d_setting.ModelMethod,
         constraints = constraints,
-         options = {'maxiter':3000,'tol':1e-2,'disp':True}
+         options = {'tol':1e-8,'disp':True,'maxiter':30000}
         #options = {'verbose': 3}
     )
     optimised_velocity_profile = np.array(optimised_velocity_profile.x) * 1 # derive the velocity profile
@@ -77,7 +85,7 @@ def main(route_df, cum_d, i):
     distance_travelled = np.sum(dx)
     print("done.")
     print("Total distance travelled for race:", distance_travelled, "km in travel time:", dt.sum() / 3600, 'hrs')
-    
+
    
   
     outdf = pd.DataFrame(

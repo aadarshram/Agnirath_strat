@@ -50,9 +50,10 @@ for i in range(5):
         # stop_gain = (200 / 3600) * d_config.PANEL_AREA * d_config.PANEL_EFFICIENCY * (np.sum(calc_solar_irradiance(np.array(range(6 * 3600, 8 * 3600, 200)))) + np.sum(calc_solar_irradiance(np.array(range(17 * 3600, 18 * 3600, 200)))))
         stop_gain = calculate_energy(6 * 3600, 8 * 3600) + calculate_energy(17 * 3600, 18 * 3600)
         present_battery_cent = np.array(outdf['Battery'])[-1]
+        print(present_battery_cent)
         cum_d = np.array(outdf['Cumulative Distance'])[-1]
         present_battery_cent = min(present_battery_cent + (stop_gain / d_config.BATTERY_CAPACITY) * 100, 100)
-
+        print(present_battery_cent)
     d_setting.set_day(day_counter, present_battery_cent, i, time_counter)
 
     outdf, timetaken = main(d_setting.route_df, cum_d, i)

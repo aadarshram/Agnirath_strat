@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 df11=pd.read_csv("raw_route_data.csv")
 df1=pd.read_csv("raw_route_data.csv")
-df2=pd.read_csv("wind_speed_t1.csv")
-df1["wind speed"]=df2["WindSpeed(m/s)"]*5/18
-df1["wind angle"]=df2["Winddirection(frmnorth)"]*5/18
+df2=pd.read_csv('windcheck.csv')
+df1["WindSpeed(m/s)"]=df2["WindSpeed(m/s)"]*5/18
+df1["Winddirection(frmnorth)"]=np.cos(df2["Winddirection(frmnorth)"])
 df1=df1.fillna(0)
 
 slope_df=df11["Slope (deg)"]
@@ -21,4 +21,6 @@ for j in range(len(df1)//200):
    
     df1["Slope (deg)"].iloc[j*200:(j+1)*200]=pd.concat([calc_slope(slope_df.iloc[j*200:j*200+200],df1["StepDistance(m)"].iloc[j*200:j*200+200])]*200,axis=0)["Slope (deg)"]
 df1["CumulativeDistance(km)"]=cum_df    
-df1.to_csv('processed_route_data.csv',index=False)    
+df1["Winddirection(frmnorth)"]=np.arccos(df1["Winddirection(frmnorth)"])*180/np.pi
+
+df1.to_csv('processed_route_data_x.csv',index=False)    

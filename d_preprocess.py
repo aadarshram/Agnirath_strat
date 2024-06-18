@@ -18,7 +18,16 @@ def find_control_stops(run_dat):
     
     nearest_cum_dist = pd.merge_asof(pd.DataFrame({'Stop distances': d_control_stops}), run_dat['Cumulative Distance'], left_on = 'Stop distances',  right_on = 'Cumulative Distance', direction = 'nearest')
     result = pd.merge(nearest_cum_dist, run_dat, on = 'Cumulative Distance')
-    
+#def find_control_stops_v(v,cumd):
+ #   d_control_stops = [322., 588., 987., 1210., 1493., 1766., 2178., 2432., 2720.]
+  #  cumd_array=np.array(v.cumsum())*200+cumd
+ #   cumd_df=pd.DataFrame({'cumulative distance':cumd_array})
+  #  nearest_cum_dist = pd.merge_asof(pd.DataFrame({'Stop distances': d_control_stops}),cumd_df['cumulative distance'] , left_on = 'Stop distances',  right_on = 'cumulative distance', direction = 'nearest')
+   # result = pd.merge(nearest_cum_dist, cumd_df, on = 'cumulative distance')
+    #return np.array(cumd_df.index[cumd_df['cumulative distance'].isin(result['cumulative distance'].unique())])
+
+    #return pd.Series(cumd_array).loc[cumd_array == result['cumulative distance'].unique()].index
+   
     return np.array(result['Time'])
 
 def format_data(run_dat):
@@ -58,6 +67,5 @@ def find_reachtime(cum_dt, cum_d):
     for i  in range(len(cum_d)):
         if cum_d[i] > 3000:
             return cum_dt[i]
-        else:
-            return cum_d[-1]
+
     return None

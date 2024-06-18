@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from d_config import BATTERY_CAPACITY
-import d_setting
+import setting_stop
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 
@@ -15,15 +15,15 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
     acceleration = (stop_speeds - start_speeds) / dt
 
     P_net,_ = calculate_power_req(avg_speed, acceleration, slope_array,ws,wd)
-    P_solar = calculate_incident_solarpower(dt.cumsum() + d_setting.TimeOffset, lattitude_array, longitude_array)
+    P_solar = calculate_incident_solarpower(dt.cumsum() + setting_stop.TimeOffset, lattitude_array, longitude_array)
 
     energy_consumption = P_net * dt /3600
     energy_gain = P_solar * dt /3600
 
     net_energy_profile = energy_consumption.cumsum() - energy_gain.cumsum()
     
-    battery_profile = d_setting.InitialBatteryCapacity - net_energy_profile
-    battery_profile = np.concatenate((np.array([d_setting.InitialBatteryCapacity]), battery_profile))
+    battery_profile = setting_stop.InitialBatteryCapacity - net_energy_profile
+    battery_profile = np.concatenate((np.array([setting_stop.InitialBatteryCapacity]), battery_profile))
 
     battery_profile = battery_profile * 100 / (BATTERY_CAPACITY)
     dx = calculate_dx(start_speeds, stop_speeds, dt)
