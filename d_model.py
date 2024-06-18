@@ -8,17 +8,17 @@ from scipy.optimize import fmin_cobyla, minimize
 import pandas as pd
 from d_config import KM, HR
 from d_car_dynamics import calculate_dx
-from d_setting import ModelMethod, InitialGuessVelocity, DT, STEP, route_df, RunforDays
+from d_setting import ModelMethod, InitialGuessVelocity, DT, STEP, route_df
 from d_constraints import get_bounds, objective, battery_and_acc_constraint #, v_end
 from d_profiles import extract_profiles
 
 
 
-def main(route_df, cum_d, i, InitialBatteryCapacity, timeoffset, FinalBatteryCapacity):
+def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     
     step = STEP
     N = DT // step
-    dt = np.full(int(N), step) # Set time scale
+    dt = np.full(int(N), step) # Set race time scale
 
     # Get data
     cum_d_array = route_df.iloc[:, 1].to_numpy()
@@ -37,17 +37,9 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, timeoffset, FinalBatteryCap
             "type": "ineq",
             "fun": battery_and_acc_constraint,
             "args": (
-                dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, timeoffset, FinalBatteryCapacity
+                dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity
             )
-        },
-
-        # {
-        #     "type": "ineq",
-        #     "fun": v_end,
-        #     "args": (
-        #         dt, cum_d,
-        #     )     
-        # }
+        }
      ]
 
 
@@ -56,13 +48,12 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, timeoffset, FinalBatteryCap
     optimised_velocity_profile = minimize(
         objective, 
         initial_velocity_profile,
-        args = (dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d
-                ),
+        args = (dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d),
         bounds = bounds,
         method = ModelMethod,
         constraints = constraints,
         #options = {'catol': 10 ** -6, 'disp': True, 'maxiter': 10 ** 5}
-        #options = {'verbose': 3}
+        #options = {'maxiter': 3}
     )
 
     # optimised_velocity_profile = fmin_cobyla(
@@ -86,7 +77,7 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, timeoffset, FinalBatteryCap
     outdf = pd.DataFrame(
         dict(zip(
             ['Time', 'Velocity', 'Acceleration', 'Battery', 'EnergyConsumption', 'Solar', 'Cumulative Distance'],
-            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, timeoffset)
+            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity)
         ))
     )
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum() / KM])
