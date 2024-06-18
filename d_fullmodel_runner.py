@@ -26,17 +26,10 @@ for i in range(RunforDays):
         present_battery_cent = np.array(outdf['Battery'])[-1]
         print(present_battery_cent)
         cum_d = np.array(outdf['Cumulative Distance'])[-1]
-<<<<<<< HEAD
-        present_battery_cent = min(present_battery_cent + (stop_gain / d_config.BATTERY_CAPACITY) * 100, 100)
-        print(present_battery_cent)
-    d_setting.set_day(day_counter, present_battery_cent, i, time_counter)
-=======
-
         stop_gain = calculate_energy(6 * HR, 8 * HR) + calculate_energy(17 * HR, 18 * HR) # 6AM - 8AM, 5PM - 6PM
->>>>>>> 5899c6c00abac063e9dfe9c54ef49803a0b4fe05
 
-        present_battery_cent = min(present_battery_cent + ((stop_gain / HR) * BATTERY_CAPACITY) * 100, 100) # Neglect excess stop gain 
-
+        present_battery_cent = min(present_battery_cent + ((stop_gain / HR) / BATTERY_CAPACITY) * 100, 100) # Neglect excess stop gain 
+        print(present_battery_cent)
     InitialBatteryCapacity, FinalBatteryCapacity = set_day(present_battery_cent, i) #, time_counter) # timeoffset = 
 
     outdf, timetaken = main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity) # Set day wise params

@@ -6,8 +6,8 @@ df2=pd.read_csv('windcheck.csv')
 df1["WindSpeed(m/s)"]=df2["WindSpeed(m/s)"]*5/18
 df1["Winddirection(frmnorth)"]=np.cos(df2["Winddirection(frmnorth)"])
 df1=df1.fillna(0)
-
-slope_df=df11["Slope (deg)"]
+df1.to_csv('raw_route_data_final.csv',index=False)
+''''slope_df=df11["Slope (deg)"]
 cum_df=df11["CumulativeDistance(km)"]
 for j in range(len(df1)//200):
     print(df1.iloc[j*200:200*(j+1)].mean(axis=0).transpose())
@@ -23,4 +23,4 @@ for j in range(len(df1)//200):
 df1["CumulativeDistance(km)"]=cum_df    
 df1["Winddirection(frmnorth)"]=np.arccos(df1["Winddirection(frmnorth)"])*180/np.pi
 
-df1.to_csv('processed_route_data_x.csv',index=False)    
+df1.to_csv('processed_route_data_x.csv',index=False)    '''
