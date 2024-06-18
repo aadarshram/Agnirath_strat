@@ -1,35 +1,21 @@
 import numpy as np
 import pandas as pd
-<<<<<<< HEAD
-from d_config import BATTERY_CAPACITY
-import setting_stop
-=======
 from d_config import BATTERY_CAPACITY, HR
 from d_setting import DT, CONTROL_STOP_DURATION
->>>>>>> 5899c6c00abac063e9dfe9c54ef49803a0b4fe05
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 from d_offrace_solarcalc import calculate_energy
 from d_helper_fns import find_control_stops
 
-<<<<<<< HEAD
-def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array,ws_array,wd_array):
-=======
-def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity):
->>>>>>> 5899c6c00abac063e9dfe9c54ef49803a0b4fe05
+def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity,wind_speed,wind_direction):
     # convert data to time domain
-    slope_array, lattitude_array, longitude_array,ws,wd = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array,'wind speed':ws_array,'wind angle':wd_array }), dt)
+    slope_array, lattitude_array, longitude_array,wind_speed_array,wind_direction_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array,'WindSpeed(m/s)':wind_speed,'Winddirection(frmnorth)':wind_direction }), dt)
 
     start_speeds, stop_speeds = velocity_profile[:-1], velocity_profile[1:]
     
     avg_speed = (start_speeds + stop_speeds) / 2
     acceleration = (stop_speeds - start_speeds) / dt
 
-<<<<<<< HEAD
-    P_net,_ = calculate_power_req(avg_speed, acceleration, slope_array,ws,wd)
-    P_solar = calculate_incident_solarpower(dt.cumsum() + setting_stop.TimeOffset, lattitude_array, longitude_array)
-=======
->>>>>>> 5899c6c00abac063e9dfe9c54ef49803a0b4fe05
 
     dx = calculate_dx(start_speeds, stop_speeds, dt)
 
@@ -45,10 +31,6 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
     cum_t = dt.cumsum() + i * DT
     control_stop_array =  find_control_stops((pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})))
     
-<<<<<<< HEAD
-    battery_profile = setting_stop.InitialBatteryCapacity - net_energy_profile
-    battery_profile = np.concatenate((np.array([setting_stop.InitialBatteryCapacity]), battery_profile))
-=======
     # Solar correction
     indices = [np.searchsorted(dt.cumsum(), t - (i * DT), side='left') for t in control_stop_array]
     dt1_cumsum = np.copy(dt.cumsum())
@@ -57,7 +39,7 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
             dt1_cumsum[idx:] += CONTROL_STOP_DURATION
 
 
-    P_req, _ = calculate_power_req(avg_speed, acceleration, slope_array)
+    P_req, _ = calculate_power_req(avg_speed, acceleration, slope_array,wind_speed_array,wind_direction_array)
     P_solar = calculate_incident_solarpower(dt1_cumsum, lattitude_array, longitude_array)
 
     energy_consumption = P_req * dt /HR # Wh
@@ -79,7 +61,6 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
 
     battery_profile = InitialBatteryCapacity - net_energy_profile
     battery_profile = np.concatenate((np.array([InitialBatteryCapacity]), battery_profile))
->>>>>>> 5899c6c00abac063e9dfe9c54ef49803a0b4fe05
 
     battery_profile = battery_profile * 100 / (BATTERY_CAPACITY)
 
