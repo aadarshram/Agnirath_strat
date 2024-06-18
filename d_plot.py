@@ -3,7 +3,7 @@ from dash import dcc, html
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
-from d_preprocess import find_control_stops, find_reachtime
+from d_helper_fns import find_control_stops, find_reachtime
 import d_config
 
 # Custom CSS styles
@@ -24,7 +24,7 @@ external_stylesheets = [
 # Initialize Dash app
 def create_app(
         cum_dt, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, t_control_stops, t
+        energy_consumption_profile, solar_profile, cum_d, t_control_stops, t, v_avg
     ):
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -69,7 +69,22 @@ def create_app(
                         go.Scatter(x=[t, t], y=[0, d_config.MAX_V], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
 
                     ],
-                    'layout': go.Layout(title='Velocity Profile', xaxis={'title': 'Time (hr)'}, yaxis={'title': 'Velocity (m/s)'})
+                    'layout': go.Layout(title='Velocity Profile', xaxis={'title': 'Time (hr)'}, yaxis={'title': 'Velocity (m/s)'},
+                                        shapes=[
+                                            {
+                                                'type': 'rect',
+                                                'xref': 'x',
+                                                'x0': t_control_stops[i],
+                                                'x1': t_control_stops[i] + 0.5,
+                                                'y0': 0,
+                                                'y1': d_config.MAX_V,
+                                                'fillcolor': 'LightSalmon',
+                                                'opacity': 0.5,
+                                                'line': {
+                                                    'width': 0,
+                                                },
+                                            } for i in range(9)
+                                        ])
                 },
                 style={'width': '93%', 'display': 'inline-block', 'vertical-align': 'top', **custom_styles}
             ),
@@ -91,7 +106,7 @@ def create_app(
                 html.Div([
                     html.Div([
                         html.P(f"Max Velocity: {round(max(velocity_profile), 3)} m/s"),
-                        html.P(f"Avg Velocity: {round(sum(velocity_profile)/len(velocity_profile), 3)} m/s"),
+                        html.P(f"Avg Velocity: {round(v_avg, 3)} m/s"),
                     ], style={'width': '50%'}),
                     html.Div([
                         html.P(f"Average Battery Level: {sum(battery_profile)/len(battery_profile):.2f}%")
@@ -134,7 +149,23 @@ def create_app(
                         go.Scatter(x=[t, t], y=[0, 100], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
 
                     ],
-                    'layout': go.Layout(title='Battery Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Battery Level'})
+                    'layout': go.Layout(title='Battery Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Battery Level'},
+                                        shapes=[
+                                            {
+                                                'type': 'rect',
+                                                'xref': 'x',
+                                                'x0': t_control_stops[i],
+                                                'x1': t_control_stops[i] + 0.5,
+                                                'y0': 0,
+                                                'y1': 100,
+                                                'fillcolor': 'LightSalmon',
+                                                'opacity': 0.5,
+                                                'line': {
+                                                    'width': 0,
+                                                },
+
+                                            } for i in range(9)
+                                        ])
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
             ),
@@ -150,7 +181,22 @@ def create_app(
                 id='solar-profile',
                 figure={
                     'data': [go.Scatter(x=cum_dt[1:], y=solar_profile[1:], mode='lines+markers', name='Solar')],
-                    'layout': go.Layout(title='Solar Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Solar Energy'})
+                    'layout': go.Layout(title='Solar Profile', xaxis={'title': 'Time'}, yaxis={'title': 'Solar Energy'},
+                                        shapes=[
+                                            {
+                                                'type': 'rect',
+                                                'xref': 'x',
+                                                'x0': t_control_stops[i],
+                                                'x1': t_control_stops[i] + 0.5,
+                                                'y0': 0,
+                                                'y1': np.max(solar_profile),
+                                                'fillcolor': 'LightSalmon',
+                                                'opacity': 0.5,
+                                                'line': {
+                                                    'width': 0,
+                                                },
+                                            } for i in range(9)
+                                        ])
                 },
                 style={'width': '45%', 'display': 'inline-block', **custom_styles}
             ),
@@ -180,15 +226,15 @@ def create_app(
                         go.Scatter(x=[27, 27], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[36, 36], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[45, 45], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
-                        go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        # go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[3000, 3000], mode='lines', name='ControlStop', line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t, t], y=[0, 3000], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
           
@@ -203,14 +249,21 @@ def create_app(
     return app
 
 if __name__ == '__main__':
-    output = pd.read_csv("final_run_dat.csv").fillna(0)
-    run_dat = pd.read_csv("run_dat.csv").fillna(0)
+
+    output = pd.read_csv("processed_run_dat.csv").fillna(0)
+
     cum_dt, velocity_profile, acceleration_profile, battery_profile, energy_consumption_profile, solar_profile, cum_d = map(np.array, (output[c] for c in output.columns.to_list()))
+
+    run_dat = pd.read_csv("raw_run_dat.csv").fillna(0)
+    v_avg = np.sum(np.array(run_dat['Velocity'])) / len(run_dat['Velocity'])
     t_control_stops = find_control_stops(run_dat)
-    # dx = dx.cumsum()
+
     t_end = find_reachtime(cum_dt, cum_d)
+    print(t_end)
+
     app = create_app(
         cum_dt / 3600, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, t_control_stops / 3600, t_end / 3600
+        energy_consumption_profile, solar_profile, cum_d, t_control_stops / 3600, t_end / 3600, v_avg
     )
+
     app.run_server(debug=True)

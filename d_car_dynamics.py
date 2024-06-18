@@ -26,15 +26,16 @@ def convert_domain_d2t(velocity_profile, route_df, dt):
     return np.array(result['Slope']), np.array(result['Lattitude']), np.array(result['Longitude']),np.array(result['wind speed']),np.array(result['wind angle'])
 
     
-def calculate_power_req(speed, acceleration, slope,ws,wd):
+
+def calculate_power_req(speed, acceleration, slope):
     '''
     Calculate Power required by Car
     '''
 
     # Resistive torque on motor
     friction_torque = ZERO_SPEED_CRR * CAR_MASS * GRAVITY * np.cos(np.radians(slope)) * OUTER_WHEEL_RADIUS # Neglecting Dynamic Crr as it's order 1/100 th of static
-    drag_torque = 0.5 * CDA * AIR_DENSITY * ((speed**2+ws**2-2*speed*ws*np.cos(np.radians(np.abs(wd)))))* OUTER_WHEEL_RADIUS
-    # t = r_out * ((m * 9.81 * u1) + (0.5 * Cd * a * rho * (omega ** 2) * (r_out ** 2)))
+    drag_torque = 0.5 * CDA * AIR_DENSITY * ((speed + 3) ** 2) * OUTER_WHEEL_RADIUS
+
     net_resistance_torque = friction_torque + drag_torque
 
     # Resistive power
@@ -67,8 +68,7 @@ def calculate_power_req(speed, acceleration, slope,ws,wd):
     P_acc = (CAR_MASS * acceleration + CAR_MASS * GRAVITY * np.sin(np.radians(slope))) * speed
 
     # Net power required
-    P_net = P_resistance + P_windage + P_ohmic + P_eddy + P_acc-100
-    # print("\u001b[31m",   CAR_MASS * GRAVITY * np.sin(np.radians(slope)) * speed, "\u001b[34m", acceleration, "\u001b[32m", slope, "\u001b[33m", speed, "\u001b[35m", P_acc, "\u001b[0m")
-    return P_net.clip(0), P_resistance # Returning P_resistance for other calculations
+    P_req = P_resistance + P_windage + P_ohmic + P_eddy + P_acc
+    return P_req.clip(0), P_resistance # Returning P_resistance for other calculations
 
 
