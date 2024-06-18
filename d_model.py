@@ -25,6 +25,8 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     slope_array = route_df.iloc[:, 2].to_numpy()
     lattitude_array = route_df.iloc[:, 3].to_numpy()
     longitude_array = route_df.iloc[:, 4].to_numpy()
+    wind_speed = route_df.iloc[:, 5].to_numpy()
+    wind_direction= route_df.iloc[:, 6].to_numpy()
 
     N_V = int(N) + 1
     
@@ -37,7 +39,7 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
             "type": "ineq",
             "fun": battery_and_acc_constraint,
             "args": (
-                dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity
+                 dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction
             )
         }
      ]
@@ -52,7 +54,7 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
         bounds = bounds,
         method = ModelMethod,
         constraints = constraints,
-        #options = {'catol': 10 ** -6, 'disp': True, 'maxiter': 10 ** 5}
+        options = {'catol': 10 ** -6, 'disp': True, 'maxiter': 10 ** 3}# "rhobeg":5.0}
         #options = {'maxiter': 3}
     )
 
@@ -74,10 +76,12 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     print("done.")
     print("Total distance travelled in day", (i+1), " :", distance_travelled, "km in travel time:", dt.sum() / HR, 'hrs')
 
+   
+  
     outdf = pd.DataFrame(
         dict(zip(
             ['Time', 'Velocity', 'Acceleration', 'Battery', 'EnergyConsumption', 'Solar', 'Cumulative Distance'],
-            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity)
+            extract_profiles(optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, wind_speed, wind_direction)
         ))
     )
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum() / KM])

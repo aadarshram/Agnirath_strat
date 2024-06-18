@@ -38,7 +38,7 @@ AVG_V = RACE_DISTANCE / (DT * RunforDays)
 discharge_list= [60, 60, 40, 40, 0]
 
 # route_df = pd.read_csv("raw_route_data.csv")
-route_df = pd.read_csv("processed_route_data.csv")
+route_df = pd.read_csv("processed_route_data_final.csv")
 
 
 def set_day(present_battery_cent, i): # , time_offset = 0

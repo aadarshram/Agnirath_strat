@@ -38,7 +38,11 @@ PANEL_EFFICIENCY = 0.19
 
 # Bus voltage
 
-BUS_VOLTAGE = 4.2 * 38 # V
+BUS_VOLTAGE = 4.2 * 38*1 # V
+
+# Low voltage loss
+
+POWER_LV = 100 # watts
 
 #-------------------------------------------------------------------------------------------
 
