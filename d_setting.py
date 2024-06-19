@@ -13,6 +13,7 @@ ModelMethod = "COBYLA"
 InitialGuessVelocity = 20 # m/s (Total average speed)
 
 RunforDays = 5
+
 # Day-wise race time
 
 RACE_START = 8 * 3600  # 8:00 am
@@ -37,9 +38,12 @@ AVG_V = RACE_DISTANCE / (DT * RunforDays)
 # Final Battery optimisation way-points
 discharge_list= [60, 60, 40, 40, 0]
 
+<<<<<<< HEAD
 # route_df = pd.read_csv("raw_route_data.csv")
 
 
+=======
+>>>>>>> e020e59 (Modify)
 
 def set_day(present_battery_cent, i): # , time_offset = 0
     '''

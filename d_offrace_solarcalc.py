@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.integrate import quad
-from d_config import PANEL_AREA, PANEL_EFFICIENCY
+from d_config import PANEL_AREA, PANEL_EFFICIENCY, HR
 from d_setting import RACE_START, RACE_END
 
 DT = RACE_END - RACE_START
@@ -18,7 +18,7 @@ def calculate_incident_solarpower(globaltime, latitude, longitude):
 # Helper function to integrate the power over the time interval
 def integrand(t):
     intensity = _calc_solar_irradiance(t)
-    return intensity * _power_coeff/3600
+    return intensity * _power_coeff / HR
 
 def calculate_energy(interval_start, interval_end):
     # Perform the integration over the specified time interval

@@ -16,6 +16,8 @@ df_list = []
 # time_counter = 0
 v_avg = 0
 
+route_df = pd.read_csv("processed_route_data.csv")
+
 
 for i in range(RunforDays):
     if i == 0:

@@ -22,7 +22,7 @@ def set_at_sampling_rate(route_df):
         route_df.loc[i: (i + int(STEP * AVG_V)),'WindSpeed(m/s)'] = route_df['WindSpeed(m/s)'][i: (i + int(STEP * AVG_V))].mean()
         route_df.loc[i: (i + int(STEP * AVG_V)),'Winddirection(frmnorth)'] = np.arccos(np.cos(route_df['Winddirection(frmnorth)'][i: (i + int(STEP * AVG_V))]).mean())
     
-    route_df.to_csv("processed_route_data_final.csv", index = False)
+    route_df.to_csv("processed_route_data.csv", index = False)
 
 def find_control_stops(run_dat):
     '''
