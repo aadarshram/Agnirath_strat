@@ -87,8 +87,6 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum() / KM])
     return outdf, dt.sum()
 
-<<<<<<< HEAD
-=======
 if __name__ == "__main__":
     
     route_df = pd.read_csv("processed_route_data_final.csv")
@@ -96,4 +94,4 @@ if __name__ == "__main__":
     outdf.to_csv('run_dat.csv', index=False)
 
     print("Written results to `run_dat.csv`")
->>>>>>> e020e59 (Modify)
+

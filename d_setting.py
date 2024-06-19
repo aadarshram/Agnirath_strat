@@ -38,13 +38,6 @@ AVG_V = RACE_DISTANCE / (DT * RunforDays)
 # Final Battery optimisation way-points
 discharge_list= [60, 60, 40, 40, 0]
 
-<<<<<<< HEAD
-# route_df = pd.read_csv("raw_route_data.csv")
-
-
-=======
->>>>>>> e020e59 (Modify)
-
 def set_day(present_battery_cent, i): # , time_offset = 0
     '''
     Set day-wise parameters
