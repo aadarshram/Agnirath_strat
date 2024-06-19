@@ -47,7 +47,7 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
     energy_consumption = energy_consumption.cumsum()
     energy_gain = P_solar * dt 
 
-    energy_gain = energy_gain.cumsum()
+    energy_gain = energy_gain
 
     # Add energy gained through control stop
     # for i,gt in enumerate(control_stop_array):
@@ -57,7 +57,7 @@ def extract_profiles(velocity_profile, dt, cum_d_array, slope_array, lattitude_a
 
     energy_gain = energy_gain / HR # Wh
     
-    net_energy_profile = energy_consumption - energy_gain
+    net_energy_profile = energy_consumption - energy_gain.cumsum()
 
     battery_profile = InitialBatteryCapacity - net_energy_profile
     battery_profile = np.concatenate((np.array([InitialBatteryCapacity]), battery_profile))

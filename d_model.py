@@ -8,7 +8,7 @@ from scipy.optimize import fmin_cobyla, minimize
 import pandas as pd
 from d_config import KM, HR
 from d_car_dynamics import calculate_dx
-from d_setting import ModelMethod, InitialGuessVelocity, DT, STEP, route_df
+from d_setting import ModelMethod, InitialGuessVelocity, DT, STEP
 from d_constraints import get_bounds, objective, battery_and_acc_constraint #, v_end
 from d_profiles import extract_profiles
 
@@ -54,7 +54,7 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
         bounds = bounds,
         method = ModelMethod,
         constraints = constraints,
-        options = {'catol': 10 ** -6, 'disp': True, 'maxiter': 10 ** 3}# "rhobeg":5.0}
+        options = {'catol': 10 ** -6, 'disp': True, 'maxiter':2* 10 ** 3}# "rhobeg":5.0}
         #options = {'maxiter': 3}
     )
 
@@ -87,8 +87,3 @@ def main(route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum() / KM])
     return outdf, dt.sum()
 
-if __name__ == "__main__":
-    outdf, _ = main(route_df)
-    outdf.to_csv('run_dat.csv', index=False)
-
-    print("Written results to `run_dat.csv`")

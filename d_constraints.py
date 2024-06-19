@@ -86,7 +86,7 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     battery_profile = InitialBatteryCapacity - energy_consumed - SAFE_BATTERY_LEVEL
     final_battery_lev = InitialBatteryCapacity - energy_consumed[-1] - FinalBatteryCapacity
 
-    return np.min(battery_profile), (BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile), MAX_P - np.max(P_req - P_solar), final_battery_lev # Ensure battery level bounds
+    return np.min(battery_profile), (BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile), MAX_P - np.max(P_req - P_solar),100* final_battery_lev # Ensure battery level bounds
     
 # def v_end(velocity_profile, dt, cum_d):
 #     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)
