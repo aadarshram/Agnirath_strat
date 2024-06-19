@@ -256,14 +256,14 @@ if __name__ == '__main__':
 
     run_dat = pd.read_csv("raw_run_dat.csv").fillna(0)
     v_avg = np.sum(np.array(run_dat['Velocity'])) / len(run_dat['Velocity'])
-    t_control_stops = find_control_stops(run_dat)
+    #t_control_stops = find_control_stops(run_dat)
 
     t_end = find_reachtime(cum_dt, cum_d)
     print(t_end)
 
     app = create_app(
         cum_dt / 3600, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, t_control_stops / 3600, t_end / 3600, v_avg
+        energy_consumption_profile, solar_profile, cum_d, np.zeros(9)/ 3600, t_end / 3600, v_avg
     )
 
     app.run_server(debug=True)
