@@ -6,11 +6,11 @@ Run day-wise distance optimization model for multiple days
 
 import pandas as pd
 import numpy as np
-from d_setting import set_day, route_df, DT, RunforDays
+from d_setting import set_day, DT, RunforDays
 from d_config import HR, BATTERY_CAPACITY
 from d_model import main
 from d_offrace_solarcalc import calculate_energy
-
+route_df = pd.read_csv("processed_route_data_final.csv")
 df_list = []
 
 # time_counter = 0
@@ -28,7 +28,7 @@ for i in range(RunforDays):
         cum_d = np.array(outdf['Cumulative Distance'])[-1]
         stop_gain = calculate_energy(6 * HR, 8 * HR) + calculate_energy(17 * HR, 18 * HR) # 6AM - 8AM, 5PM - 6PM
 
-        present_battery_cent = min(present_battery_cent + ((stop_gain / HR) / BATTERY_CAPACITY) * 100, 100) # Neglect excess stop gain 
+        present_battery_cent = min(present_battery_cent + ((stop_gain ) / BATTERY_CAPACITY) * 100, 100) # Neglect excess stop gain 
         print(present_battery_cent)
     InitialBatteryCapacity, FinalBatteryCapacity = set_day(present_battery_cent, i) #, time_counter) # timeoffset = 
 
