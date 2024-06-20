@@ -31,10 +31,11 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
     control_stop_array =  find_control_stops((dfx))
     # control_stop_array = cum_t[np.searchsorted(cum_dtot, dis, side='right') for dis in d_control_stops]
     # control_stop_array=[i for i in control_stop_array if i!=0 or i!= len(cum_dtot)-1]
-
+      
     #Solar correction
     indices = [np.searchsorted(dt.cumsum(), t-i*DT, side='right') for t in control_stop_array ]
-    
+    print("chilla",[t-i*DT for t in control_stop_array])
+    print()
     print("control stops my igga",control_stop_array)
     print("control-spto",indices)
     dt1 = np.copy(dt)
@@ -53,9 +54,9 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
 
     energy_gain1 = energy_gain
     energy_gain = energy_gain / HR 
-    
+    indices=[i for i in indices if i<len(energy_gain) and i!=0]
     #Add energy gained through control stop
-    for i,gt in enumerate(control_stop_array):
+    for i,gt in enumerate(control_stop_array[range(0,len(indices))]):
         print(i,indices[i])
         t = int(gt % (DT))
         control_stop_E = calculate_energy(t, t + CONTROL_STOP_DURATION)

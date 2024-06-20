@@ -6,5 +6,4 @@ import numpy as np
 from d_setting import FULL_DAY_TIME
 run_dat = pd.read_csv('xxx.csv')
 
-print(sum(calculate_incident_solarpower(np.array(range(14000,14000+1800,200)),0,0)*200/3600))
-print(calculate_energy(14000,14000+1800))
+print(sum(calculate_incident_solarpower(np.array(range(55200,14000+1800,200)),0,0)*200/3600))
