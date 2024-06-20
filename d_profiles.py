@@ -23,7 +23,6 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
 
    # Find control stops
     cum_dtot = dx.cumsum() + cum_d
-    print("cumd",cum_d)
     cum_dtot=cum_dtot/ K
     cum_t = dt.cumsum() + i * DT
     print(cum_t[:10])
@@ -59,8 +58,8 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
     #Add energy gained through control stop
     for i,gt in enumerate(control_stop_array[range(0,len(indices))]):
         print(i,indices[i])
-        t = int(gt % (FULL_DAY_TIME))
-        control_stop_E = calculate_energy(t+RACE_START, t + CONTROL_STOP_DURATION+RACE_START)
+        t = int(gt % (DT))
+        control_stop_E = calculate_energy(t, t + CONTROL_STOP_DURATION)
         
         print("en",energy_gain[indices[i]])
         energy_gain[indices[i]] += control_stop_E
