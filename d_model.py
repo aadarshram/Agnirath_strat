@@ -81,7 +81,7 @@ def main(k,DT,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     outdf = pd.DataFrame(
         dict(zip(
             ['Time', 'Velocity', 'Acceleration', 'Battery', 'EnergyConsumption', 'Solar', 'Cumulative Distance'],
-            extract_profiles(k,DT,optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, wind_speed, wind_direction)
+            extract_profiles(k,optimised_velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, wind_speed, wind_direction)
         ))
     )
     outdf['Cumulative Distance'] = np.concatenate([[0], dx.cumsum() / KM])

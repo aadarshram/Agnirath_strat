@@ -70,7 +70,7 @@ def add_control_stops(run_dat):
         acc_array = [0 for _ in range(len(time_array))]
         v_array = [0 for _ in range(len(time_array))]
         cum_d_array = [(run_dat.at[i, 'Cumulative Distance']) for _ in range(len(time_array))]
-        solar_array =  ((STEP/HR ) * calc_solar_irradiance(time_array%(FULL_DAY_TIME)))*PANEL_AREA*PANEL_EFFICIENCY
+        solar_array =  np.array([((STEP/HR ) * calculate_incident_solarpower(k%(FULL_DAY_TIME),0,0)) for k in time_array])
         energy_consumption_array = [0 for _ in range(len(time_array))]
         battery_array = ((run_dat.at[i, 'Battery'] / 100 * BATTERY_CAPACITY) + solar_array.cumsum()) / BATTERY_CAPACITY * 100
 

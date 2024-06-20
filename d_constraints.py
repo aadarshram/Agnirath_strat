@@ -65,6 +65,7 @@ def battery_and_acc_constraint(velocity_profile,DT, dt, cum_d_array, slope_array
 
     # Solar correction
     indices = [np.searchsorted(dt.cumsum(), t - i*DT, side='left') for t in control_stop_array ]
+    
     dt1 = np.copy(dt)
     for idx in indices:
         if idx < len(dt1):
@@ -77,6 +78,7 @@ def battery_and_acc_constraint(velocity_profile,DT, dt, cum_d_array, slope_array
     energy_consumed = ((P_req - P_solar) * dt).cumsum()
     energy_consumed = energy_consumed / HR
     # Add energy gained through control stop
+ 
     for i,gt in enumerate(control_stop_array):
         #if len(indices)>0:
         t = int(gt % (DT))
