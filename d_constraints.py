@@ -82,7 +82,7 @@ def battery_and_acc_constraint(velocity_profile,DT, dt, cum_d_array, slope_array
     for i,gt in enumerate(control_stop_array):
         #if len(indices)>0:
         t = int(gt % (DT))
-        control_stop_E = calculate_energy(t, t + CONTROL_STOP_DURATION)
+        control_stop_E = calculate_energy(t+RACE_START, t + CONTROL_STOP_DURATION+RACE_START)
         energy_consumed[indices[i]:] -= control_stop_E
 
      # Wh
