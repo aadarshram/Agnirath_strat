@@ -22,12 +22,14 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
    
 
    # Find control stops
-    cum_dtot = dx.cumsum() + cum_d
+    cum_dtot = dx.cumsum() + cum_d*K
+    print(cum_d)
     cum_dtot=cum_dtot/ K
     cum_t = dt.cumsum() + i * DT
     print(cum_t[:10])
     dfx=pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})
-    
+    l=str(i)
+    dfx.to_csv("xxxx"+l+".csv",index=False)
     control_stop_array =  find_control_stops((dfx))
     # control_stop_array = cum_t[np.searchsorted(cum_dtot, dis, side='right') for dis in d_control_stops]
     # control_stop_array=[i for i in control_stop_array if i!=0 or i!= len(cum_dtot)-1]
@@ -39,6 +41,8 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
     print("control stops my igga",control_stop_array)
     print("control-spto",indices)
     dt1 = np.copy(dt)
+    indices=[i for i in indices if i<len(avg_speed) and i!=0 and i!=1]
+    print("ssss",indices)
     for idx in indices:
         if idx < len(dt1) and idx!=0:
             dt1[idx] += CONTROL_STOP_DURATION
@@ -54,31 +58,41 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
 
     energy_gain1 = energy_gain
     energy_gain = energy_gain / HR 
-    indices=[i for i in indices if i<len(energy_gain) and i!=0]
-    #Add energy gained through control stop
-    for i,gt in enumerate(control_stop_array[range(0,len(indices))]):
-        print(i,indices[i])
-        t = int(gt % (DT))
-        control_stop_E = calculate_energy(t, t + CONTROL_STOP_DURATION)
-        
-        print("en",energy_gain[indices[i]])
-        energy_gain[indices[i]] += control_stop_E
-        print("en1",energy_gain[indices[i]])
-    # Wh
     
+    #Add energy gained through control stop
+    k=2*i
+    for id,gt in enumerate(control_stop_array[range(0,len(indices))]):
+        print(id,indices[id])
+        t = int(gt % (DT))
+        
+        control_stop_E = calculate_energy(t+RACE_START+STEP+k*CONTROL_STOP_DURATION, t + CONTROL_STOP_DURATION+k*CONTROL_STOP_DURATION+RACE_START+STEP)
+        
+        print("en",energy_gain.cumsum()[indices[id]])
+        print("en",energy_gain.cumsum()[indices[id]+1])
+        print("en",energy_consumption.cumsum()[indices[id]])
+        print("en",energy_consumption.cumsum()[indices[id]+1])
+        energy_gain[indices[id]] += control_stop_E
+        print("en1",energy_consumption.cumsum()[indices[id]])
+        print("en1",energy_consumption.cumsum()[indices[id]+1])
+        print("en1",energy_gain.cumsum()[indices[id]])
+        print("en1",energy_gain.cumsum()[indices[id]+1])
+        k=k+1
     net_energy_profile = energy_consumption.cumsum() - energy_gain.cumsum()
 
     battery_profile = InitialBatteryCapacity - net_energy_profile
     battery_profile = np.concatenate((np.array([InitialBatteryCapacity]), battery_profile))
 
     battery_profile = battery_profile * 100 / (BATTERY_CAPACITY)
-    
+    print("batt-less",battery_profile[indices])
+    # print("bat_more",battery_profile[np.array(indices)])
+    # print("bat_more1",battery_profile[np.array(indices)+1])
+    # print("bat_more1",battery_profile[np.array(indices)+2])
     # Matching shapes
     dt =  np.concatenate((np.array([0]), dt))
     energy_gain = np.concatenate((np.array([np.nan]), energy_gain))
     #energy_gain = np.concatenate((np.array([np.nan]), energy_gain))
     energy_gain1 = np.concatenate((np.array([np.nan]), energy_gain1))
-    energy_consumption =  np.concatenate((np.array([np.nan]), energy_consumption,))
+    energy_consumption =  np.concatenate((np.array([np.nan]), energy_consumption))
     acceleration = np.concatenate((np.array([np.nan]), acceleration,))
     dx = np.concatenate((np.array([0]), dx))
     

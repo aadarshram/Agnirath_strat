@@ -58,14 +58,14 @@ def battery_and_acc_constraint(velocity_profile,DT, dt, cum_d_array, slope_array
    
 
     # Find control stops
-    cum_dtot = dx.cumsum() + cum_d
+    cum_dtot = dx.cumsum() + cum_d*K
     cum_dtot=cum_dtot/K
     cum_t = dt.cumsum() + i * DT
     control_stop_array =  find_control_stops((pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})))
 
     # Solar correction
     indices = [np.searchsorted(dt.cumsum(), t - i*DT, side='left') for t in control_stop_array ]
-    
+    indices=[i for i in indices if i<len(avg_speed) and i!=0 and i!=1]
     dt1 = np.copy(dt)
     for idx in indices:
         if idx < len(dt1):
@@ -78,11 +78,12 @@ def battery_and_acc_constraint(velocity_profile,DT, dt, cum_d_array, slope_array
     energy_consumed = ((P_req - P_solar) * dt).cumsum()
     energy_consumed = energy_consumed / HR
     # Add energy gained through control stop
- 
-    for i,gt in enumerate(control_stop_array):
+    
+
+    for i,gt in enumerate(control_stop_array[range(len(indices))]):
         #if len(indices)>0:
         t = int(gt % (DT))
-        control_stop_E = calculate_energy(t, t + CONTROL_STOP_DURATION)
+        control_stop_E = calculate_energy(t+RACE_START, t + CONTROL_STOP_DURATION+RACE_START)
         energy_consumed[indices[i]:] -= control_stop_E
 
      # Wh

@@ -39,6 +39,7 @@ AVG_V = RACE_DISTANCE / (DT * RunforDays)
 # Final Battery optimisation way-points
 discharge_list= [50, 40, 30, 20, 0]
 
+
 # route_df = pd.read_csv("raw_route_data.csv")
 
 

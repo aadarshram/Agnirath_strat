@@ -59,6 +59,7 @@ def add_control_stops(run_dat):
     '''
 
     time = find_control_stops(run_dat)
+    print("tim-",time)
     i_list = []
     for t in time:
         i = run_dat.index[run_dat['Time'] == t][0]
