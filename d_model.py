@@ -8,13 +8,13 @@ from scipy.optimize import fmin_cobyla, minimize
 import pandas as pd
 from d_config import KM, HR
 from d_car_dynamics import calculate_dx
-from d_setting import ModelMethod, InitialGuessVelocity, STEP
+from d_setting import ModelMethod, InitialGuessVelocity, STEP,DT
 from d_constraints import get_bounds, objective, battery_and_acc_constraint #, v_end
 from d_profiles import extract_profiles
 
 
 
-def main(k,DT,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
+def main(k,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     
     step = STEP
     N = DT // step
@@ -39,7 +39,7 @@ def main(k,DT,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
             "type": "ineq",
             "fun": battery_and_acc_constraint,
             "args": (
-                 DT,dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction
+                 dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction
             )
         }
      ]
@@ -50,7 +50,8 @@ def main(k,DT,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     optimised_velocity_profile = minimize(
         objective, 
         initial_velocity_profile,
-        args = (dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d),
+        args = ( dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction),
+
         bounds = bounds,
         method = ModelMethod,
         constraints = constraints,

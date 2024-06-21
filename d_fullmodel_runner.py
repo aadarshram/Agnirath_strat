@@ -32,7 +32,7 @@ for i in range(RunforDays):
         print(present_battery_cent)
     InitialBatteryCapacity, FinalBatteryCapacity,DT = set_day(present_battery_cent, i) #, time_counter) # timeoffset = 
     
-    outdf, timetaken = main(k,DT,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity) # Set day wise params
+    outdf, timetaken = main(k,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity) # Set day wise params
 
     outdf['Time'] = outdf['Time'] + k
     k+=DT

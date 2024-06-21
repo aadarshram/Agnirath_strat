@@ -6,7 +6,7 @@ Constraints, bounds and objective for the model
 import numpy as np
 import pandas as pd
 from d_config import BATTERY_CAPACITY, DISCHARGE_CAP, MAX_V,  MAX_CURRENT, CAR_MASS, BUS_VOLTAGE, HR,K
-from d_setting import CONTROL_STOP_DURATION, STEP,RACE_START
+from d_setting import CONTROL_STOP_DURATION, STEP,RACE_START,DT
 from d_car_dynamics import calculate_dx, calculate_power_req, convert_domain_d2t
 from d_solar import calculate_incident_solarpower
 from d_offrace_solarcalc import calculate_energy
@@ -32,7 +32,7 @@ def get_bounds(N):
     #else:
      #   return 0
 
-def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d):
+def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction):
     '''
     Maximize total distance travelled
     '''
@@ -40,9 +40,11 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     #Min_B, B_bar = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
 
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
-    return - np.sum(dx) #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
+    a,b,c,d= battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction)
 
-def battery_and_acc_constraint(velocity_profile,DT, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction):
+    return - np.sum(dx)+10**6*abs(d) #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
+
+def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction):
     '''
     Battery safety and acceleration constraint
     '''

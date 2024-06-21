@@ -10,7 +10,7 @@ import pandas as pd
 # Model Settings
 
 ModelMethod = "COBYLA"
-InitialGuessVelocity = 20 # m/s (Total average speed)
+InitialGuessVelocity = 25 # m/s (Total average speed)
 
 RunforDays = 5
 # Day-wise race time
@@ -37,7 +37,7 @@ DT_list=[8,8,16,16,24,24,32,32,39.5]
 AVG_V = RACE_DISTANCE / (DT * RunforDays)
 
 # Final Battery optimisation way-points
-discharge_list= [50, 40, 30, 20, 0]
+discharge_list= [27, 20, 0, 0, 0]
 
 
 # route_df = pd.read_csv("raw_route_data.csv")
