@@ -32,7 +32,7 @@ def get_bounds(N):
     #else:
      #   return 0
 
-def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction):
+def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction):
     '''
     Maximize total distance travelled
     '''
@@ -40,11 +40,11 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     #Min_B, B_bar = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
 
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
-    a,b,c,d= battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction)
+    pos_batt, discharge, max_p, final_bat= battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction)
 
-    return - np.sum(dx)+10**6*abs(d) #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
+    return - np.sum(dx) + 10 ** 6 * abs(final_bat) #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
 
-def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction):
+def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction):
     '''
     Battery safety and acceleration constraint
     '''
@@ -60,18 +60,18 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
    
 
     # Find control stops
-    cum_dtot = dx.cumsum() + cum_d*K
-    cum_dtot=cum_dtot/K
+    cum_dtot = dx.cumsum() + cum_d * K
+    cum_dtot=cum_dtot / K
     cum_t = dt.cumsum() + i * DT
     control_stop_array =  find_control_stops((pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})))
 
     # Solar correction
-    indices = [np.searchsorted(dt.cumsum(), t - i*DT, side='left') for t in control_stop_array ]
-    indices=[i for i in indices if i<len(avg_speed) and i!=0 and i!=1]
+    indices = [np.searchsorted(dt.cumsum(), t - i * DT, side='left') for t in control_stop_array ]
+    indices=[i for i in indices if i < len(avg_speed) and i != 0 and i != 1]
     dt1 = np.copy(dt)
     for idx in indices:
         if idx < len(dt1):
-            dt1[idx]+= CONTROL_STOP_DURATION 
+            dt1[idx] += CONTROL_STOP_DURATION 
 
     P_req, _ = calculate_power_req(avg_speed, acceleration, slope_array,wind_speed_array,wind_direction_array)
     P_solar = calculate_incident_solarpower(dt1.cumsum(), lattitude_array, longitude_array)

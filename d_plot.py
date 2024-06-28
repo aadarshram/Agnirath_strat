@@ -226,15 +226,15 @@ def create_app(
                         go.Scatter(x=[27, 27], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[36, 36], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
                         go.Scatter(x=[45, 45], y=[0, 3000], mode='lines', name="EndofDay", line=dict(color='green', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
-                        # go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[0], t_control_stops[0]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[1], t_control_stops[1]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[2], t_control_stops[2]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[3], t_control_stops[3]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[4], t_control_stops[4]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[5], t_control_stops[5]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[6], t_control_stops[6]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[7], t_control_stops[7]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
+                        go.Scatter(x=[t_control_stops[8], t_control_stops[8]], y=[0, 3000], mode='lines', name="ControlStop", line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[min(cum_dt), max(cum_dt)], y=[3000, 3000], mode='lines', name='ControlStop', line=dict(color='blue', dash='dot')),
                         go.Scatter(x=[t, t], y=[0, 3000], mode='lines', name="Our Finish", line=dict(color='yellow', dash='dot')),
           
@@ -257,13 +257,13 @@ if __name__ == '__main__':
     run_dat = pd.read_csv("raw_run_dat.csv").fillna(0)
     v_avg = np.sum(np.array(run_dat['Velocity'])) / len(run_dat['Velocity'])
     #t_control_stops = find_control_stops(run_dat)
-
+    
     t_end = find_reachtime(cum_dt, cum_d)
     print(t_end)
 
     app = create_app(
         cum_dt / 3600, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, np.zeros(9)/ 3600, t_end / 3600, v_avg
+        energy_consumption_profile, solar_profile, cum_d, find_control_stops(output)[range(0,len(find_control_stops(output)),10)]/3600, t_end / 3600, v_avg
     )
-
+    print(find_control_stops(output)[range(0,len(find_control_stops(output)),10)]/3600)
     app.run_server(debug=True)

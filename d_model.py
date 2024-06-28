@@ -39,7 +39,7 @@ def main(k,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
             "type": "ineq",
             "fun": battery_and_acc_constraint,
             "args": (
-                 dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction
+                 dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction
             )
         }
      ]
@@ -50,7 +50,7 @@ def main(k,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     optimised_velocity_profile = minimize(
         objective, 
         initial_velocity_profile,
-        args = ( dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity,wind_speed,wind_direction),
+        args = ( dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction),
 
         bounds = bounds,
         method = ModelMethod,

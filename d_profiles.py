@@ -1,13 +1,13 @@
 import numpy as np
 import pandas as pd
 from d_config import BATTERY_CAPACITY, HR,K
-from d_setting import  CONTROL_STOP_DURATION,STEP,RACE_START,d_control_stops,FULL_DAY_TIME, DT
+from d_setting import  CONTROL_STOP_DURATION,STEP,RACE_START,d_control_stops,FULL_DAY_TIME, DT,DT_list, DT_list_day
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 from d_offrace_solarcalc import calculate_energy
 from d_helper_fns import find_control_stops
 
-def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, wind_speed, wind_direction):
+def extract_profiles(k, velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, wind_speed, wind_direction):
     # convert data to time domain
     slope_array, lattitude_array, longitude_array, wind_speed_array, wind_direction_array = convert_domain_d2t(velocity_profile, pd.DataFrame({'CumulativeDistance(km)': cum_d_array, 'Slope': slope_array, 'Lattitude': lattitude_array, 'Longitude': longitude_array,'WindSpeed(m/s)':wind_speed,'Winddirection(frmnorth)':wind_direction }), dt)
 
@@ -22,9 +22,9 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
    
 
    # Find control stops
-    cum_dtot = dx.cumsum() + cum_d*K
+    cum_dtot = dx.cumsum() + cum_d * K
     print(cum_d)
-    cum_dtot=cum_dtot/ K
+    cum_dtot=cum_dtot / K
     cum_t = dt.cumsum() + i * DT
     print(cum_t[:10])
     dfx=pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})
@@ -35,16 +35,16 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
     # control_stop_array=[i for i in control_stop_array if i!=0 or i!= len(cum_dtot)-1]
       
     #Solar correction
-    indices = [np.searchsorted(dt.cumsum(), t-i*DT, side='right') for t in control_stop_array ]
+    indices = [np.searchsorted(dt.cumsum() , t - DT_list_day[i], side = 'right') for t in control_stop_array ]
     # print("chilla",[t-i*DT for t in control_stop_array])
 
     # print("control stops my igga",control_stop_array)
     # print("control-spto",indices)
     dt1 = np.copy(dt)
-    indices=[i for i in indices if i<len(avg_speed) and i!=0 and i!=1]
+    indices=[i for i in indices if i<len(avg_speed) and i != 0 and i != 1]
     # print("ssss",indices)
     for idx in indices:
-        if idx < len(dt1) and idx!=0:
+        if idx < len(dt1) and idx != 0:
             dt1[idx] += CONTROL_STOP_DURATION
 
 
@@ -61,11 +61,11 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
     
     #Add energy gained through control stop
     k=2*i
-    for id,gt in enumerate(control_stop_array[range(0,len(indices))]):
+    for id, gt in enumerate(control_stop_array[range(0,len(indices))]):
         # print(id,indices[id])
-        t = int(gt % (DT))
+        t = int(gt % (DT_list_day[i+1] - DT_list_day[i]))
         
-        control_stop_E = calculate_energy(t+RACE_START+STEP+k*CONTROL_STOP_DURATION, t + CONTROL_STOP_DURATION+k*CONTROL_STOP_DURATION+RACE_START+STEP)
+        control_stop_E = calculate_energy(t + RACE_START + STEP + k * CONTROL_STOP_DURATION, t + CONTROL_STOP_DURATION + k * CONTROL_STOP_DURATION + RACE_START + STEP)
         
         # print("en",energy_gain.cumsum()[indices[id]])
         # print("en",energy_gain.cumsum()[indices[id]+1])
@@ -102,6 +102,6 @@ def extract_profiles(k,velocity_profile, dt, cum_d_array, slope_array, lattitude
         acceleration,
         battery_profile,
         energy_consumption,
-        energy_gain1/HR,
+        energy_gain1 / HR,
         dx,
     ]

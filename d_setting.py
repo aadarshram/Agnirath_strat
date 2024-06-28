@@ -4,9 +4,9 @@ Set day-wise model parameters
 
 # Import necessary modules
 
-from d_config import BATTERY_CAPACITY, KM
+from d_config import BATTERY_CAPACITY, KM, HR
 import pandas as pd
-
+import numpy as np
 # Model Settings
 
 ModelMethod = "COBYLA"
@@ -15,8 +15,8 @@ InitialGuessVelocity = 25 # m/s (Total average speed)
 RunforDays = 5
 # Day-wise race time
 
-RACE_START = 8 * 3600  # 8:00 am
-RACE_END = 17 * 3600  # 5:00 pm
+RACE_START = 8 * HR  # 8:00 am
+RACE_END = 17 * HR  # 5:00 pm
 FULL_DAY_TIME=RACE_END-RACE_START
 
 RACE_DISTANCE = 3037 * KM
@@ -28,16 +28,17 @@ DT = RACE_END - RACE_START - 2 * CONTROL_STOP_DURATION # Race time for model
 
 # Control stops
 d_control_stops = [322., 588., 987., 1210., 1493., 1766., 2178., 2432., 2720.] # 2023 data
-control_stop_number=[2,2,2,2,1]
+control_stop_number=[2, 2, 2, 2, 1]
 # Resolution 
 STEP = 200 # s
-DT_list=[8,8,16,16,24,24,32,32,39.5]
+DT_list=np.array([8, 8, 16, 16, 24, 24, 32, 32, 40]) * HR
+DT_list_day=np.array([0, 8, 16, 24, 32, 40]) * HR
 # Average velocity
 
 AVG_V = RACE_DISTANCE / (DT * RunforDays)
 
 # Final Battery optimisation way-points
-discharge_list= [27, 20, 0, 0, 0]
+discharge_list= [27, 27, 27, 27, 0]
 
 
 # route_df = pd.read_csv("raw_route_data.csv")
@@ -49,7 +50,7 @@ def set_day(present_battery_cent, i): # , time_offset = 0
     Set day-wise parameters
     '''
 
-    global InitialBatteryCapacity,DT
+    global InitialBatteryCapacity, DT
     # global TimeOffset
     DT = RACE_END - RACE_START - control_stop_number[i] * CONTROL_STOP_DURATION
     # TimeOffset = time_offset

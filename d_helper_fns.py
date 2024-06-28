@@ -20,7 +20,7 @@ def set_at_sampling_rate(route_df):
     for i in range(0, len(route_df), int(STEP * AVG_V)):
         route_df.loc[i: (i + int(STEP * AVG_V)),'Slope (deg)'] = (route_df['Slope (deg)'][i: (i + int(STEP * AVG_V))] * route_df['StepDistance(m)'][i: (i + int(STEP * AVG_V))]).sum() / (route_df['StepDistance(m)'][i: (i + int(STEP * AVG_V))]).sum()
         route_df.loc[i: (i + int(STEP * AVG_V)),'WindSpeed(m/s)'] = route_df['WindSpeed(m/s)'][i: (i + int(STEP * AVG_V))].mean()
-        route_df.loc[i: (i + int(STEP * AVG_V)),'Winddirection(frmnorth)'] = np.arccos(np.cos(route_df['Winddirection(frmnorth)'][i: (i + int(STEP * AVG_V))]).mean())*180/np.pi
+        route_df.loc[i: (i + int(STEP * AVG_V)),'Winddirection(frmnorth)'] = np.arccos(np.cos(route_df['Winddirection(frmnorth)'][i: (i + int(STEP * AVG_V))]).mean())* 180 / np.pi
     
     route_df.to_csv("processed_route_data_final.csv", index = False)
 
