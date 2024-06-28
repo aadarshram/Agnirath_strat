@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from d_solar import calc_solar_irradiance,calculate_incident_solarpower
 from d_config import PANEL_AREA, PANEL_EFFICIENCY, BATTERY_CAPACITY, HR, KM
-from d_setting import STEP, AVG_V, d_control_stops, RACE_DISTANCE, CONTROL_STOP_DURATION, DT_list,FULL_DAY_TIME,RACE_START
+from d_setting import STEP, AVG_V, d_control_stops, RACE_DISTANCE, CONTROL_STOP_DURATION,FULL_DAY_TIME
 
 
 # Helper functions

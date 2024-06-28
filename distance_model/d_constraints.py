@@ -5,8 +5,8 @@ Constraints, bounds and objective for the model
 
 import numpy as np
 import pandas as pd
-from d_config import BATTERY_CAPACITY, DISCHARGE_CAP, MAX_V,  MAX_CURRENT, CAR_MASS, BUS_VOLTAGE, HR,K
-from d_setting import CONTROL_STOP_DURATION, STEP,RACE_START,DT
+from d_config import BATTERY_CAPACITY, DISCHARGE_CAP, MAX_V,  MAX_CURRENT, BUS_VOLTAGE, HR,K
+from d_setting import CONTROL_STOP_DURATION,RACE_START,DT_list_day,RunforDays
 from d_car_dynamics import calculate_dx, calculate_power_req, convert_domain_d2t
 from d_solar import calculate_incident_solarpower
 from d_offrace_solarcalc import calculate_energy
@@ -40,9 +40,9 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     #Min_B, B_bar = battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array)
 
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
-    pos_batt, discharge, max_p, final_bat= battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction)
+    discharge, overcharge, max_p, final_bat= battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction)
 
-    return - np.sum(dx) + 10 ** 6 * abs(final_bat) #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
+    return - np.sum(dx) + 10 ** 3 * abs(final_bat) - discharge * (RunforDays-i) * 10 ** 2#+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
 
 def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction):
     '''
@@ -61,19 +61,29 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
 
     # Find control stops
     cum_dtot = dx.cumsum() + cum_d * K
+    
     cum_dtot=cum_dtot / K
-    cum_t = dt.cumsum() + i * DT
-    control_stop_array =  find_control_stops((pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})))
+    cum_t = dt.cumsum() + DT_list_day[i]
+    dfx=pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})
+   
+    control_stop_array =  find_control_stops((dfx))
+    
+      
+    #Solar correction
+    indices = [np.searchsorted(dt.cumsum() , t - DT_list_day[i], side = 'right') for t in control_stop_array ]
+    # print("chilla",[t-i*DT for t in control_stop_array])
 
-    # Solar correction
-    indices = [np.searchsorted(dt.cumsum(), t - i * DT, side='left') for t in control_stop_array ]
-    indices=[i for i in indices if i < len(avg_speed) and i != 0 and i != 1]
+    # print("control stops my igga",control_stop_array)
+    # print("control-spto",indices)
     dt1 = np.copy(dt)
+    indices=[i for i in indices if i<len(avg_speed) and i != 0 and i != 1]
+    # print("ssss",indices)
     for idx in indices:
-        if idx < len(dt1):
-            dt1[idx] += CONTROL_STOP_DURATION 
+        if idx < len(dt1) and idx != 0:
+            dt1[idx] += CONTROL_STOP_DURATION
 
-    P_req, _ = calculate_power_req(avg_speed, acceleration, slope_array,wind_speed_array,wind_direction_array)
+
+    P_req, _ = calculate_power_req(avg_speed, acceleration, slope_array, wind_speed_array, wind_direction_array)
     P_solar = calculate_incident_solarpower(dt1.cumsum(), lattitude_array, longitude_array)
    # P_solar = calculate_incident_solarpower(dt1_cumsum, lattitude_array, longitude_array)
 
@@ -81,19 +91,20 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     energy_consumed = energy_consumed / HR
     # Add energy gained through control stop
     
-
-    for i,gt in enumerate(control_stop_array[range(len(indices))]):
-        #if len(indices)>0:
-        t = int(gt % (DT))
-        control_stop_E = calculate_energy(t+RACE_START, t + CONTROL_STOP_DURATION+RACE_START)
-        energy_consumed[indices[i]:] -= control_stop_E
-
+    k=2*i
+    for id, gt in enumerate(control_stop_array[range(0,len(indices))]):
+        # print(id,indices[id])
+        t = int((gt+k * CONTROL_STOP_DURATION) % (RunforDays * HR))
+        
+        control_stop_E = calculate_energy(t + RACE_START, t + CONTROL_STOP_DURATION +  RACE_START)
+        energy_consumed[indices[id]:] -= control_stop_E
+        k+=1
      # Wh
 
     battery_profile = InitialBatteryCapacity - energy_consumed - SAFE_BATTERY_LEVEL
     final_battery_lev = InitialBatteryCapacity - energy_consumed[-1] - FinalBatteryCapacity
 
-    return np.min(battery_profile), (BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile), MAX_P - np.max(P_req - P_solar),1000* final_battery_lev # Ensure battery level bounds
+    return np.min(battery_profile),(BATTERY_CAPACITY - SAFE_BATTERY_LEVEL) - np.max(battery_profile), MAX_P - np.max(P_req - P_solar),1000* final_battery_lev # Ensure battery level bounds
     
 # def v_end(velocity_profile, dt, cum_d):
 #     dx = calculate_dx(velocity_profile[:-1], velocity_profile[1:], dt)

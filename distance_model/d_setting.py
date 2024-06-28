@@ -28,17 +28,19 @@ DT = RACE_END - RACE_START - 2 * CONTROL_STOP_DURATION # Race time for model
 
 # Control stops
 d_control_stops = [322., 588., 987., 1210., 1493., 1766., 2178., 2432., 2720.] # 2023 data
-control_stop_number=[2, 2, 2, 2, 1]
+control_stop_number=np.array([2, 2, 2, 3, 0])
 # Resolution 
 STEP = 200 # s
-DT_list=np.array([8, 8, 16, 16, 24, 24, 32, 32, 40]) * HR
-DT_list_day=np.array([0, 8, 16, 24, 32, 40]) * HR
+
+# List of Race time by day
+DT_list_day=np.array([0,9,18,27,36])*HR-control_stop_number.cumsum()*CONTROL_STOP_DURATION+HR
+
 # Average velocity
 
 AVG_V = RACE_DISTANCE / (DT * RunforDays)
 
 # Final Battery optimisation way-points
-discharge_list= [27, 27, 27, 27, 0]
+discharge_list= [20, 20, 20, 29, 0]
 
 
 # route_df = pd.read_csv("raw_route_data.csv")

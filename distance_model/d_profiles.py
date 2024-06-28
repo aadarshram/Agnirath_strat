@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from d_config import BATTERY_CAPACITY, HR,K
-from d_setting import  CONTROL_STOP_DURATION,STEP,RACE_START,d_control_stops,FULL_DAY_TIME, DT,DT_list, DT_list_day
+from d_setting import  CONTROL_STOP_DURATION,RACE_START, DT_list_day,RunforDays
 from d_car_dynamics import calculate_power_req, convert_domain_d2t, calculate_dx
 from d_solar import calculate_incident_solarpower
 from d_offrace_solarcalc import calculate_energy
@@ -25,11 +25,11 @@ def extract_profiles(k, velocity_profile, dt, cum_d_array, slope_array, lattitud
     cum_dtot = dx.cumsum() + cum_d * K
     print(cum_d)
     cum_dtot=cum_dtot / K
-    cum_t = dt.cumsum() + i * DT
+    cum_t = dt.cumsum() + DT_list_day[i]
     print(cum_t[:10])
     dfx=pd.DataFrame({'Cumulative Distance': cum_dtot, 'Time': cum_t})
-    l=str(i)
-    dfx.to_csv("xxxx"+l+".csv",index=False)
+    # l=str(i)
+    # dfx.to_csv("xxxx"+l+".csv",index=False)
     control_stop_array =  find_control_stops((dfx))
     # control_stop_array = cum_t[np.searchsorted(cum_dtot, dis, side='right') for dis in d_control_stops]
     # control_stop_array=[i for i in control_stop_array if i!=0 or i!= len(cum_dtot)-1]
@@ -63,9 +63,9 @@ def extract_profiles(k, velocity_profile, dt, cum_d_array, slope_array, lattitud
     k=2*i
     for id, gt in enumerate(control_stop_array[range(0,len(indices))]):
         # print(id,indices[id])
-        t = int(gt % (DT_list_day[i+1] - DT_list_day[i]))
+        t = int((gt+k * CONTROL_STOP_DURATION) % (RunforDays * HR))
         
-        control_stop_E = calculate_energy(t + RACE_START + STEP + k * CONTROL_STOP_DURATION, t + CONTROL_STOP_DURATION + k * CONTROL_STOP_DURATION + RACE_START + STEP)
+        control_stop_E = calculate_energy(t + RACE_START, t + CONTROL_STOP_DURATION +  RACE_START)
         
         # print("en",energy_gain.cumsum()[indices[id]])
         # print("en",energy_gain.cumsum()[indices[id]+1])

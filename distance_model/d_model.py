@@ -4,17 +4,17 @@ Main day-wise model
 
 # Import necessary modules
 import numpy as np
-from scipy.optimize import fmin_cobyla, minimize
+from scipy.optimize import minimize
 import pandas as pd
 from d_config import KM, HR
 from d_car_dynamics import calculate_dx
-from d_setting import ModelMethod, InitialGuessVelocity, STEP,DT
+from d_setting import ModelMethod, InitialGuessVelocity, STEP
 from d_constraints import get_bounds, objective, battery_and_acc_constraint #, v_end
 from d_profiles import extract_profiles
 
 
 
-def main(k,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
+def main(DT,k,route_df, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity):
     
     step = STEP
     N = DT // step
