@@ -42,7 +42,7 @@ def objective(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, l
     # return np.abs(3055 * 10**3 - cum_d - np.sum(dx)) 
     discharge, overcharge, max_p, final_bat= battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction)
 
-    return - np.sum(dx) + 10 ** 3 * abs(final_bat) - discharge * (RunforDays-i) * 10 ** 2#+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
+    return - np.sum(dx) + 10 ** 3 * abs(final_bat) - 10 ** 2 * discharge * (RunforDays-i) #+ np.max(-Min_B * 10 ** 16, 0) + np.max(-B_bar * 10 ** 12, 0)
 
 def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, lattitude_array, longitude_array, cum_d, i, InitialBatteryCapacity, FinalBatteryCapacity, wind_speed, wind_direction):
     '''
@@ -91,10 +91,10 @@ def battery_and_acc_constraint(velocity_profile, dt, cum_d_array, slope_array, l
     energy_consumed = energy_consumed / HR
     # Add energy gained through control stop
     
-    k=2*i
+    k = 2 * i
     for id, gt in enumerate(control_stop_array[range(0,len(indices))]):
         # print(id,indices[id])
-        t = int((gt+k * CONTROL_STOP_DURATION) % (RunforDays * HR))
+        t = int((gt + k * CONTROL_STOP_DURATION) % (RunforDays * HR))
         
         control_stop_E = calculate_energy(t + RACE_START, t + CONTROL_STOP_DURATION +  RACE_START)
         energy_consumed[indices[id]:] -= control_stop_E

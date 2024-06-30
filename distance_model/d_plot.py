@@ -4,7 +4,7 @@ import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 from d_helper_fns import find_control_stops, find_reachtime
-import d_config
+from d_config import HR
 
 # Custom CSS styles
 custom_styles = {
@@ -260,8 +260,8 @@ if __name__ == '__main__':
     print(t_end)
 
     app = create_app(
-        cum_dt / 3600, velocity_profile, acceleration_profile, battery_profile,
-        energy_consumption_profile, solar_profile, cum_d, find_control_stops(output)[range(0,len(find_control_stops(output)),10)]/3600, t_end / 3600, v_avg
+        cum_dt / HR, velocity_profile, acceleration_profile, battery_profile,
+        energy_consumption_profile, solar_profile, cum_d, find_control_stops(output)[range(0,len(find_control_stops(output)),10)] / HR, t_end / HR, v_avg
     )
-    print(find_control_stops(output)[range(0,len(find_control_stops(output)),10)]/3600)
+    print(find_control_stops(output)[range(0,len(find_control_stops(output)),10)] / HR)
     app.run_server(debug=True)

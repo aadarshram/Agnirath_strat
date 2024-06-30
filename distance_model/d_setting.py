@@ -33,7 +33,7 @@ control_stop_number=np.array([2, 2, 2, 3, 0])
 STEP = 200 # s
 
 # List of Race time by day
-DT_list_day=np.array([0,9,18,27,36])*HR-control_stop_number.cumsum()*CONTROL_STOP_DURATION+HR
+DT_list_day = np.array([0,9,18,27,36]) * HR - control_stop_number.cumsum() * CONTROL_STOP_DURATION + HR
 
 # Average velocity
 
